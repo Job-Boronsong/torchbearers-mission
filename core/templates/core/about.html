@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- ================= ABOUT HERO ================= -->
+<section class="page-hero"
+         style="background-image: url('{% static "images/IMG_20250321_063922_921.jpg" %}');">
+
+  <div class="page-hero-overlay"></div>
+
+  <div class="page-hero-content">
+    <h1>About Us</h1>
+    <p>Raising and sending missionaries everywhere</p>
+  </div>
+
+</section>
+
+
+<!-- ================= ABOUT INTRO ================= -->
+<section class="py-5">
+  <div class="container text-center">
+
+    <h2 class="fw-bold mb-4">Who We Are</h2>
+
+    <p class="about-intro mx-auto">
+      Torchbearers Missions Incorporated is comprised of missionaries,
+      ministry workers, and partners across Ghana and beyond.
+      We are led by a Mission Board and supported by dedicated staff
+      and volunteers working together to fulfill our God-given mandate.
+    </p>
+
+    <p class="about-intro mx-auto">
+      Our work focuses on evangelism, community outreach,
+      humanitarian support, and leadership development.
+    </p>
+
+  </div>
+</section>
+
+
+<!-- ================= VISION & FAITH ================= -->
+<section class="py-5 bg-light">
+  <div class="container">
+
+    <div class="row g-4 align-items-stretch">
+
+      {% if mv %}
+
+      <!-- LEFT: VISION & PURPOSE -->
+      <div class="col-lg-6">
+        <div class="info-card h-100">
+          <h3 class="info-title">Our Vision & Purpose</h3>
+
+          {% if mv and mv.vision_and_purpose %}
+            <div class="info-text">
+              {{ mv.vision_and_purpose|safe }}
+            </div>
+          {% else %}
+            <p class="text-muted">Vision content will be available soon.</p>
+          {% endif %}
+        </div>
+      </div>
+
+
+      <!-- RIGHT: STATEMENT OF FAITH -->
+      <div class="col-lg-6">
+        <div class="info-card info-card-highlight h-100">
+          <h3 class="info-title">Statement of Faith</h3>
+
+          <div class="info-text">
+            {{ mv.statement_of_faith|linebreaks }}
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+
+      <!-- FALLBACK (Admin not filled yet) -->
+      <div class="col-12 text-center text-muted">
+        <p>Vision and Statement of Faith content will be available soon.</p>
+      </div>
+
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ================= TEAM SECTION ================= -->
+<section class="team-section py-5">
+  <div class="container">
+
+    <h2 class="fw-bold text-center mb-3">Our Team</h2>
+
+    <p class="text-center mb-5 team-intro">
+      Meet the dedicated leaders and servants behind Torchbearers Missions Incorporated.
+    </p>
+
+    <div class="row g-4 justify-content-center">
+
+      {% for member in team %}
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+        <div class="team-card card border-0 shadow-sm h-100">
+
+          <!-- IMAGE -->
+          <div class="team-img-wrapper">
+            <img src="{{ member.photo.url }}"
+                 alt="{{ member.name }}"
+                 class="team-img">
+          </div>
+
+          <!-- CONTENT -->
+          <div class="card-body text-center">
+            <h5 class="mb-1">{{ member.name }}</h5>
+            <p class="team-role mb-3">{{ member.role }}</p>
+
+            <div class="d-flex justify-content-center gap-3 team-socials">
+              {% if member.facebook %}
+                <a href="{{ member.facebook }}" target="_blank"><i class="bi bi-facebook"></i></a>
+              {% endif %}
+              {% if member.twitter %}
+                <a href="{{ member.twitter }}" target="_blank"><i class="bi bi-twitter-x"></i></a>
+              {% endif %}
+              {% if member.linkedin %}
+                <a href="{{ member.linkedin }}" target="_blank"><i class="bi bi-linkedin"></i></a>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {% empty %}
+        <p class="text-center text-muted">Team information coming soon.</p>
+      {% endfor %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+
+    <!-- Heading -->
+    <div class="text-center mb-5">
+      <h1 class="fw-bold mb-3">Contact Us</h1>
+      <p class="text-muted mx-auto" style="max-width: 600px;">
+        Have a question, prayer request, or want to partner with us?
+        We would love to hear from you.
+      </p>
+    </div>
+
+    <!-- Success Message -->
+    {% if success %}
+      <div class="alert alert-success text-center mb-4">
+        Your message has been sent successfully. We will get back to you soon.
+      </div>
+    {% endif %}
+
+    <!-- Form -->
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+
+        <form method="post" class="card shadow-sm border-0 p-4">
+          {% csrf_token %}
+
+          <!-- Honeypot field (DO NOT REMOVE) -->
+            <div style="display:none;">
+            <label>Leave this field empty</label>
+            <input type="text" name="website">
+            </div>
+
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Full Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email Address</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Subject</label>
+            <input type="text" name="subject" class="form-control" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Message</label>
+            <textarea name="message" rows="5" class="form-control" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            Send Message
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

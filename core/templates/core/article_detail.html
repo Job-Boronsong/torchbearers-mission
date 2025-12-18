@@ -1,0 +1,32 @@
+<article class="article-container">
+
+    <!-- Header -->
+    <header class="article-header text-center mb-4">
+        <h1 class="article-title">{{ article.title }}</h1>
+
+        {% if article.subtitle %}
+        <h5 class="text-muted">{{ article.subtitle }}</h5>
+        {% endif %}
+
+        {% if article.author %}
+        <p class="small text-secondary">
+            By {{ article.author }} · {{ article.created_at|date:"F j, Y" }}
+        </p>
+        {% endif %}
+    </header>
+
+    <!-- Featured Image -->
+    {% if article.featured_image %}
+    <div class="article-image text-center mb-4">
+        <img src="{{ article.featured_image.url }}"
+             class="img-fluid rounded"
+             alt="{{ article.title }}">
+    </div>
+    {% endif %}
+
+    <!-- Body -->
+    <div class="article-body">
+        {{ article.content|linebreaks }}
+    </div>
+
+</article>

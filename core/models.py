@@ -1,0 +1,233 @@
+from django.db import models
+from django.utils.text import slugify
+from django.utils.html import mark_safe
+from .utils.image import optimize_image
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+
+
+# =========================
+# Mission & Vision
+# =========================
+class MissionVision(models.Model):
+    vision_and_purpose = models.TextField()
+    statement_of_faith = models.TextField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Mission Vision & Faith"
+
+
+# =========================
+# Projects
+# =========================
+class Project(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, blank=True)
+    description = models.TextField()
+    image = models.ImageField(upload_to='projects/')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+# =========================
+# Blog
+# =========================
+class BlogPost(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, blank=True)
+    content = models.TextField()
+    image = models.ImageField(upload_to='blog/')
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+# =========================
+# Volunteers (ONLY ONCE ✅)
+# =========================
+class Volunteer(models.Model):
+    full_name = models.CharField(max_length=200)
+    email = models.EmailField()
+    phone = models.CharField(max_length=30)
+    message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.full_name
+
+
+# =========================
+# Donations
+# =========================
+class Donation(models.Model):
+    PAYMENT_METHODS = (
+        ('momo', 'Mobile Money'),
+        ('card', 'Visa Card'),
+    )
+
+    MOMO_NETWORKS = (
+        ('mtn', 'MTN MoMo'),
+        ('telecel', 'Telecel Cash'),
+    )
+
+    donor_name = models.CharField(max_length=200, blank=True)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
+    momo_network = models.CharField(max_length=10, choices=MOMO_NETWORKS, blank=True)
+    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"GHS {self.amount} - {self.payment_method}"
+
+
+# =========================
+# Contact Messages
+# =========================
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.subject} - {self.name}"
+
+
+# =========================
+# Team Members
+# =========================
+class TeamMember(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=150)
+    photo = models.ImageField(upload_to='team/')
+    is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        img = Image.open(self.photo.path)
+
+        if img.height > 600 or img.width > 600:
+            img.thumbnail((600, 600))
+            img.save(self.photo.path)
+
+
+# =========================
+# Footer Content
+# =========================
+class FooterContent(models.Model):
+    address = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone = models.CharField(max_length=30)
+
+    whatsapp = models.CharField(
+        max_length=20,
+        help_text="International format e.g. 233XXXXXXXXX"
+    )
+
+    facebook = models.URLField(blank=True)
+    twitter = models.URLField(blank=True)
+    linkedin = models.URLField(blank=True)
+
+    map_embed = models.TextField(
+        help_text="Paste Google Maps iframe code here"
+    )
+
+    def __str__(self):
+        return "Footer Content"
+
+
+# core/models.py
+class Article(models.Model):
+    CATEGORY_CHOICES = (
+        ('blog', 'Blog'),
+        ('project', 'Project'),
+    )
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True)
+    author = models.CharField(max_length=100, blank=True)
+    featured_image = models.ImageField(upload_to='articles/', blank=True)
+    content = models.TextField()  # rich text later
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class CarouselSlide(models.Model):
+
+    LAYOUT_CHOICES = (
+        ("center", "Center"),
+        ("left", "Left aligned"),
+        ("right", "Right aligned"),
+    )
+
+    title = models.CharField(max_length=200)
+    subtitle = models.TextField(blank=True)
+    image = models.ImageField(upload_to="carousel/")
+    button_text = models.CharField(max_length=100, blank=True)
+    button_link = models.URLField(blank=True)
+    layout = models.CharField(
+        max_length=10,
+        choices=LAYOUT_CHOICES,
+        default="center"
+    )
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image)
+            img = img.convert("RGB")
+
+            # Resize (safe for large screens)
+            img.thumbnail((1920, 1080))
+
+            buffer = BytesIO()
+            img.save(buffer, format="WEBP", quality=80)
+
+            self.image.save(
+                self.image.name.split(".")[0] + ".webp",
+                ContentFile(buffer.getvalue()),
+                save=False
+            )
+
+            super().save(update_fields=["image"])
+
+    def __str__(self):
+        return self.title
+
+
+
+
