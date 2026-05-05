@@ -75,6 +75,7 @@ export interface HomeData {
 
 export interface AboutData {
   mission_vision: {
+    hero_image: string | null;
     vision_and_purpose: string;
     statement_of_faith: string;
   };

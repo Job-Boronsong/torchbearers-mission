@@ -170,6 +170,7 @@ def api_about(request):
 
     return JsonResponse({
         "mission_vision": {
+            "hero_image": _image_url(request, mv.hero_image) if mv else None,
             "vision_and_purpose": mv.vision_and_purpose if mv else "",
             "statement_of_faith": mv.statement_of_faith if mv else "",
         },

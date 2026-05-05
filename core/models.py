@@ -19,6 +19,7 @@ from django.core.files.base import ContentFile
 # Mission & Vision
 # =========================
 class MissionVision(models.Model):
+    hero_image = models.ImageField(upload_to='about/', blank=True, null=True, help_text="Background image for the About Us hero section")
     vision_and_purpose = models.TextField()
     statement_of_faith = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)

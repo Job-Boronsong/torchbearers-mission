@@ -29,8 +29,31 @@ export default function About() {
   return (
     <div>
       {/* Header */}
-      <section style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--text-light)', padding: '5rem 0', textAlign: 'center' }}>
-        <div className="container">
+      <section style={{
+        position: 'relative',
+        color: 'var(--text-light)',
+        padding: '5rem 0',
+        textAlign: 'center',
+        backgroundColor: 'var(--brand-primary)',
+        overflow: 'hidden',
+      }}>
+        {data?.mission_vision?.hero_image && (
+          <img
+            src={data.mission_vision.hero_image}
+            alt=""
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              opacity: 0.35,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <h1 className="h1" style={{ color: 'var(--text-light)', marginBottom: '1rem' }}>About Us</h1>
           <p className="h4" style={{ opacity: 0.9, maxWidth: '600px', margin: '0 auto' }}>
             A community dedicated to shining light in dark places.
