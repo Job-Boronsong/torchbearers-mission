@@ -1,23 +1,135 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h1>Send Newsletter: {{ newsletter.title }}</h1>
+<h1>Send Newsletter: <em>{{ newsletter.title }}</em></h1>
+<p style="color:#555;">Subject: <strong>{{ newsletter.subject }}</strong> &nbsp;|&nbsp; Total subscribers: <strong>{{ subscribers|length }}</strong></p>
 
-<form method="post">
+<form method="post" id="send-form">
   {% csrf_token %}
 
-  <table class="admin-table">
-    {% for sub in subscribers %}
-      <tr>
-        <td>
-          <input type="checkbox" name="subscribers" value="{{ sub.id }}">
-        </td>
-        <td>{{ sub.email }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+  <!-- Toolbar -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+    <input
+      type="text"
+      id="email-search"
+      placeholder="Search emails…"
+      autocomplete="off"
+      style="padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;width:280px;outline:none;"
+    >
+    <button type="button" id="btn-select-all"
+      style="padding:7px 16px;background:#417690;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">
+      Select All
+    </button>
+    <button type="button" id="btn-deselect-all"
+      style="padding:7px 16px;background:#6c757d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;">
+      Deselect All
+    </button>
+    <span id="selected-count" style="font-size:13px;color:#333;font-weight:600;"></span>
+  </div>
 
-  <br>
-  <input type="submit" class="default" value="Send Newsletter">
+  <!-- Subscriber list -->
+  <div style="border:1px solid #ddd;border-radius:4px;max-height:420px;overflow-y:auto;background:#fff;">
+    <table style="width:100%;border-collapse:collapse;" id="subscriber-table">
+      <thead style="position:sticky;top:0;background:#f8f8f8;z-index:1;">
+        <tr style="border-bottom:2px solid #ddd;">
+          <th style="width:44px;padding:10px 14px;text-align:center;">
+            <input type="checkbox" id="header-check" title="Toggle visible">
+          </th>
+          <th style="padding:10px 14px;text-align:left;font-size:13px;color:#555;">Email</th>
+          <th style="padding:10px 14px;text-align:left;font-size:13px;color:#555;">Name</th>
+        </tr>
+      </thead>
+      <tbody id="subscriber-body">
+        {% for sub in subscribers %}
+        <tr class="sub-row" data-email="{{ sub.email|lower }}" data-name="{{ sub.first_name|lower }}"
+          style="border-bottom:1px solid #f0f0f0;transition:background 0.1s;">
+          <td style="padding:9px 14px;text-align:center;">
+            <input type="checkbox" name="subscribers" value="{{ sub.id }}" class="sub-check">
+          </td>
+          <td style="padding:9px 14px;font-size:14px;">{{ sub.email }}</td>
+          <td style="padding:9px 14px;font-size:14px;color:#555;">{{ sub.first_name|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="padding:20px;text-align:center;color:#888;">No active subscribers found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div id="no-results" style="display:none;padding:16px;text-align:center;color:#888;font-size:14px;">
+    No subscribers match your search.
+  </div>
+
+  <!-- Actions -->
+  <div style="margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <input type="submit" class="default" value="Send Newsletter"
+      style="padding:10px 24px;font-size:14px;cursor:pointer;">
+    <a href="{% url 'admin:core_newsletter_changelist' %}"
+      style="color:#555;font-size:13px;text-decoration:none;">← Cancel</a>
+  </div>
 </form>
-{% endblock %}
 
+<script>
+(function () {
+  const searchInput  = document.getElementById('email-search');
+  const btnAll       = document.getElementById('btn-select-all');
+  const btnNone      = document.getElementById('btn-deselect-all');
+  const headerCheck  = document.getElementById('header-check');
+  const countLabel   = document.getElementById('selected-count');
+  const noResults    = document.getElementById('no-results');
+  const rows         = Array.from(document.querySelectorAll('.sub-row'));
+  const checks       = Array.from(document.querySelectorAll('.sub-check'));
+
+  function visibleRows() {
+    return rows.filter(r => r.style.display !== 'none');
+  }
+
+  function updateCount() {
+    const total    = checks.filter(c => c.checked).length;
+    countLabel.textContent = total > 0 ? total + ' selected' : '';
+    const vis = visibleRows();
+    headerCheck.indeterminate = false;
+    const checkedVis = vis.filter(r => r.querySelector('.sub-check').checked).length;
+    if (vis.length === 0) {
+      headerCheck.checked = false;
+    } else if (checkedVis === vis.length) {
+      headerCheck.checked = true;
+    } else if (checkedVis === 0) {
+      headerCheck.checked = false;
+    } else {
+      headerCheck.indeterminate = true;
+    }
+  }
+
+  function applySearch() {
+    const q = searchInput.value.toLowerCase().trim();
+    let shown = 0;
+    rows.forEach(row => {
+      const match = !q || row.dataset.email.includes(q) || row.dataset.name.includes(q);
+      row.style.display = match ? '' : 'none';
+      if (match) shown++;
+    });
+    noResults.style.display = shown === 0 ? '' : 'none';
+    updateCount();
+  }
+
+  function setVisible(checked) {
+    visibleRows().forEach(r => { r.querySelector('.sub-check').checked = checked; });
+    updateCount();
+  }
+
+  searchInput.addEventListener('input', applySearch);
+  btnAll.addEventListener('click',  () => setVisible(true));
+  btnNone.addEventListener('click', () => setVisible(false));
+  headerCheck.addEventListener('change', () => setVisible(headerCheck.checked));
+  checks.forEach(c => c.addEventListener('change', updateCount));
+
+  // Row hover highlight
+  rows.forEach(row => {
+    row.addEventListener('mouseenter', () => { row.style.background = '#f5faff'; });
+    row.addEventListener('mouseleave', () => { row.style.background = ''; });
+  });
+
+  updateCount();
+})();
+</script>
+{% endblock %}
