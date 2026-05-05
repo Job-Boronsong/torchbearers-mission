@@ -32,7 +32,7 @@ export default function About() {
       <section style={{
         position: 'relative',
         color: 'var(--text-light)',
-        padding: '5rem 0',
+        padding: '9rem 0',
         textAlign: 'center',
         backgroundColor: 'var(--brand-primary)',
         overflow: 'hidden',
