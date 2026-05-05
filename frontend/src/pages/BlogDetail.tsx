@@ -53,12 +53,8 @@ export default function BlogDetail() {
           
           <h1 className="h1" style={{ marginBottom: '1.5rem' }}>{post.title}</h1>
           
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', color: 'var(--text-muted)' }}>
-            {post.author && (
-              <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>{post.author}</div>
-            )}
-            {post.author && <span>•</span>}
-            <div>{format(new Date(post.created_at), 'MMMM d, yyyy')}</div>
+          <div style={{ color: 'var(--text-muted)' }}>
+            {format(new Date(post.created_at), 'MMMM d, yyyy')}
           </div>
         </div>
       </section>
