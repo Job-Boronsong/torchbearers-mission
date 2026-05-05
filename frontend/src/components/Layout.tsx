@@ -46,11 +46,15 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
 
       {/* Main Nav */}
       <div className="container" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
-          {/* Using text logo if no image */}
-          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700, lineHeight: 1.1 }}>
-            Torchbearers <br/>
-            <span style={{ color: 'var(--brand-primary)', fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Mission</span>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)' }}>
+          <img
+            src="/logo.png"
+            alt="Torchbearers Mission Incorporated"
+            style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
+          />
+          <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 700, lineHeight: 1.2 }}>
+            Torchbearers Mission<br />
+            <span style={{ color: 'var(--brand-secondary)', fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Incorporated</span>
           </div>
         </Link>
 
