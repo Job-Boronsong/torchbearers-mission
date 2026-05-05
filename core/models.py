@@ -317,7 +317,6 @@ class Newsletter(models.Model):
     title = models.CharField(max_length=200)
     subject = models.CharField(max_length=255)
     body = models.TextField(help_text="HTML content only (no <html> or <body>)")
-    week_number = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     sent = models.BooleanField(default=False)
 

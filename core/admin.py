@@ -252,7 +252,6 @@ class NewsletterAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "subject",
-        "week_number",
         "created_at",
         "sent",
         "open_count",
@@ -260,7 +259,7 @@ class NewsletterAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("created_at", "preview")
-    fields = ("title", "subject", "week_number", "body", "preview")
+    fields = ("title", "subject", "body", "preview")
     actions = ("send_newsletter_action",)
 
     # =========================
@@ -275,12 +274,8 @@ class NewsletterAdmin(admin.ModelAdmin):
             {
                 "subject": obj.subject,
                 "body": obj.body,
-                "first_name": "Friend",
-                "week_number": obj.week_number,
-                "year": timezone.now().year,
-                "unsubscribe_url": "#",
                 "first_name": "Subscriber",
-
+                "year": timezone.now().year,
                 "unsubscribe_url": "#",
             }
         )
@@ -354,14 +349,8 @@ class NewsletterAdmin(admin.ModelAdmin):
                     {
                         "subject": newsletter.subject,
                         "body": newsletter.body,
-                        "first_name": getattr(sub, "first_name", "Friend"),
-                        "week_number": newsletter.week_number,
+                        "first_name": sub.first_name or "Friend",
                         "year": timezone.now().year,
-                        "unsubscribe_url": unsubscribe_url,
-                        "first_name": sub.first_name,
-                        "week_number": newsletter.week_number,
-                        "year": timezone.now().year,
-
                         "unsubscribe_url": unsubscribe_url,
                     }
                 ) + f'<img src="{open_pixel}" width="1" height="1" style="display:none;">'
