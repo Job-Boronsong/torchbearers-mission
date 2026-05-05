@@ -22,6 +22,10 @@ ALLOWED_HOSTS = [
     "www.torchbearersmission.org",
     "torchbearersmissions.org",
     "www.torchbearersmissions.org",
+    os.getenv("REPLIT_DEV_DOMAIN", ""),
+    ".replit.dev",
+    ".replit.app",
+    ".janeway.replit.dev",
 ]
 
 # --------------------------------------------------
@@ -39,6 +43,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.torchbearersmission.org",
     "https://torchbearersmissions.org",
     "https://www.torchbearersmissions.org",
+    "https://*.replit.dev",
+    "https://*.replit.app",
+    "https://*.janeway.replit.dev",
 ]
 
 # --------------------------------------------------
@@ -76,6 +83,7 @@ AUTHENTICATION_BACKENDS = [
 # --------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -151,6 +159,7 @@ USE_TZ = True
 # --------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -244,12 +253,21 @@ LOGIN_REDIRECT_URL = "/admin/"
 LOGOUT_REDIRECT_URL = "/admin/login/"
 
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+REDIS_URL = os.getenv("REDIS_URL", "")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
         }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+            "LOCATION": "127.0.0.1:11211",
+        }
+    }
