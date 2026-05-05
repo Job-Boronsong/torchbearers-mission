@@ -36,29 +36,53 @@ from .models import (
 
 from django.contrib.admin import AdminSite
 
+# =====================================================
+# CUSTOM ADMIN SITE — grouping + branding
+# =====================================================
 class TorchbearersAdminSite(AdminSite):
     site_header = "Torchbearers Missions Admin"
     site_title = "Torchbearers Admin Portal"
     index_title = "Welcome to Torchbearers Missions Dashboard"
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                "newsletter/send/<int:newsletter_id>/",
-                self.admin_view(send_newsletter_select_subscribers),
-                name="send_newsletter_select_subscribers",
-            ),
-        ]
-        return custom_urls + urls
-torchbearers_admin_site = TorchbearersAdminSite(name="torchbearers_admin")
+    def get_app_list(self, request, app_label=None):
+        app_list = super().get_app_list(request, app_label)
+
+        about_us_model_names = {'MissionVision', 'WhoWeAre', 'TeamMember'}
+        excluded_model_names = {'Article'}
+        about_us_order = {'MissionVision': 0, 'WhoWeAre': 1, 'TeamMember': 2}
+
+        about_us_entries = []
+
+        for app in app_list:
+            remaining = []
+            for model in app['models']:
+                name = model['object_name']
+                if name in about_us_model_names:
+                    about_us_entries.append(model)
+                elif name not in excluded_model_names:
+                    remaining.append(model)
+            app['models'] = remaining
+
+        # Drop now-empty app groups
+        app_list = [a for a in app_list if a['models']]
+
+        if about_us_entries:
+            about_us_entries.sort(key=lambda m: about_us_order.get(m['object_name'], 99))
+            app_list.insert(0, {
+                'name': 'About Us',
+                'app_label': 'about_us',
+                'app_url': '#',
+                'has_module_perms': True,
+                'models': about_us_entries,
+            })
+
+        return app_list
 
 
-# =====================================================
-# ADMIN BRANDING
-# =====================================================
+# Replace default admin site class in-place so all @admin.register() decorators work
+admin.site.__class__ = TorchbearersAdminSite
 admin.site.site_header = "Torchbearers Missions Admin"
-admin.site.site_title = "Torchbearers Admin Portal"
+admin.site.site_title  = "Torchbearers Admin Portal"
 admin.site.index_title = "Welcome to Torchbearers Missions Dashboard"
 
 
@@ -89,15 +113,6 @@ class DonationAdmin(admin.ModelAdmin):
     search_fields = ("donor_name", "email", "transaction_id")
     readonly_fields = ("transaction_id", "created_at")
 
-
-# =====================================================
-# ARTICLES
-# =====================================================
-@admin.register(Article)
-class ArticleAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "author", "created_at")
-    list_filter = ("category", "created_at")
-    search_fields = ("title", "author")
 
 
 # =====================================================
