@@ -57,9 +57,9 @@ export default function About() {
                 <h3 className="h3" style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }}>Vision & Purpose</h3>
                 <div className="rich-text text-muted" dangerouslySetInnerHTML={{ __html: data.mission_vision.vision_and_purpose }} />
               </div>
-              <div style={{ backgroundColor: 'var(--bg-card)', padding: '3rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
-                <h3 className="h3" style={{ color: 'var(--brand-primary)', marginBottom: '1.5rem' }}>Statement of Faith</h3>
-                <div className="rich-text text-muted" dangerouslySetInnerHTML={{ __html: data.mission_vision.statement_of_faith }} />
+              <div style={{ background: 'linear-gradient(135deg, #1a3faa 0%, #2979ff 100%)', padding: '3rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
+                <h3 className="h3" style={{ color: '#fff', marginBottom: '1.5rem' }}>Statement of Faith</h3>
+                <div className="rich-text" style={{ color: 'rgba(255,255,255,0.92)' }} dangerouslySetInnerHTML={{ __html: data.mission_vision.statement_of_faith }} />
               </div>
             </div>
           </div>
