@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     "axes",
     "django_otp",
     "django_ratelimit",
+    "rest_framework",
+    "corsheaders",
 ]
 
 # --------------------------------------------------
@@ -84,6 +86,7 @@ AUTHENTICATION_BACKENDS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -253,6 +256,21 @@ LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/admin/"
 LOGOUT_REDIRECT_URL = "/admin/login/"
 
+
+# --------------------------------------------------
+# CORS (for React frontend dev server)
+# --------------------------------------------------
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.replit\.dev$",
+    r"^https://.*\.replit\.app$",
+    r"^https://.*\.janeway\.replit\.dev$",
+]
 
 REDIS_URL = os.getenv("REDIS_URL", "")
 if REDIS_URL:

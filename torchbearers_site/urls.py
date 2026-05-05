@@ -20,6 +20,9 @@ urlpatterns = [
 
     # Donate page
     path("donate/", views.donate_page, name="donate"),
+
+    # REST API for React frontend
+    path("api/", include("core.api_urls")),
 ]
 
 if settings.DEBUG:
