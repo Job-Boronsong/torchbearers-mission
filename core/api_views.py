@@ -17,7 +17,7 @@ from .models import (
 
 def _image_url(request, field):
     if field and field.name:
-        return request.build_absolute_uri(field.url)
+        return field.url  # relative path e.g. /media/carousel/img.webp — proxied by Vite
     return None
 
 
