@@ -195,6 +195,7 @@ def api_footer(request):
         "facebook": footer.facebook,
         "twitter": footer.twitter,
         "linkedin": footer.linkedin,
+        "map_embed": footer.map_embed,
     })
 
 

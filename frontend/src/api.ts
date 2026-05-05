@@ -55,6 +55,7 @@ export interface FooterContent {
   facebook: string | null;
   twitter: string | null;
   linkedin: string | null;
+  map_embed: string | null;
 }
 
 export interface Stats {

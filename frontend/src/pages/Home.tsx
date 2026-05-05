@@ -264,10 +264,10 @@ export default function Home() {
       )}
 
       {/* Newsletter */}
-      <section style={{ backgroundColor: 'var(--brand-secondary)', padding: '5rem 0' }}>
+      <section style={{ backgroundColor: 'var(--brand-primary)', padding: '5rem 0' }}>
         <div className="container" style={{ maxWidth: '600px', textAlign: 'center' }}>
-          <h2 className="h2" style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>Stay Connected</h2>
-          <p style={{ color: 'var(--text-main)', opacity: 0.9, marginBottom: '2rem' }}>
+          <h2 className="h2" style={{ color: '#ffffff', marginBottom: '1rem' }}>Stay Connected</h2>
+          <p style={{ color: 'rgba(255,255,255,0.88)', marginBottom: '2rem' }}>
             Subscribe to our newsletter for updates, prayer points, and stories of transformation.
           </p>
           

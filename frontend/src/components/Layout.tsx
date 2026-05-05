@@ -135,60 +135,125 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
 
 const Footer = ({ footerData }: { footerData: FooterContent | null }) => {
   return (
-    <footer style={{ backgroundColor: '#1f1f1f', color: '#fbf9f6', padding: '4rem 0 2rem' }}>
+    <footer style={{ backgroundColor: '#0f1c2e', color: '#ffffff', padding: '4rem 0 0' }}>
       <div className="container">
-        <div className="grid-3" style={{ marginBottom: '3rem' }}>
+        {/* Main grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2.5rem', marginBottom: '3rem' }}>
+
+          {/* Brand column */}
           <div>
-            <h3 style={{ color: 'var(--brand-secondary)', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Torchbearers</h3>
-            <p style={{ color: '#ccc', marginBottom: '1.5rem' }}>
-              A Christian missions organization based in Ghana that raises and sends missionaries across Africa and beyond.
+            <img src="/logo.png" alt="Torchbearers Mission" style={{ height: '56px', width: 'auto', marginBottom: '1rem', filter: 'brightness(0) invert(1)' }} />
+            <p style={{ color: '#ffffff', lineHeight: 1.7, fontSize: '0.95rem' }}>
+              A Christian missions organization based in Ghana raising and sending missionaries across Africa and beyond.
             </p>
           </div>
-          
+
+          {/* Quick Links */}
           <div>
-            <h4 style={{ color: '#fff', marginBottom: '1.5rem' }}>Quick Links</h4>
-            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <li><Link to="/about" style={{ color: '#ccc' }}>About Us</Link></li>
-              <li><Link to="/projects" style={{ color: '#ccc' }}>Our Projects</Link></li>
-              <li><Link to="/volunteer" style={{ color: '#ccc' }}>Volunteer</Link></li>
-              <li><Link to="/donate" style={{ color: '#ccc' }}>Donate</Link></li>
+            <h4 style={{ color: '#ffffff', marginBottom: '1.25rem', fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Quick Links</h4>
+            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {[
+                { label: 'About Us', to: '/about' },
+                { label: 'Our Projects', to: '/projects' },
+                { label: 'Blog', to: '/blog' },
+                { label: 'Volunteer', to: '/volunteer' },
+                { label: 'Donate', to: '/donate' },
+                { label: 'Contact', to: '/contact' },
+              ].map(link => (
+                <li key={link.to}>
+                  <Link to={link.to} style={{ color: '#ffffff', fontSize: '0.95rem', transition: 'opacity 0.15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                  >{link.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
-          
+
+          {/* Contact Info */}
           <div>
-            <h4 style={{ color: '#fff', marginBottom: '1.5rem' }}>Contact Info</h4>
+            <h4 style={{ color: '#ffffff', marginBottom: '1.25rem', fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Contact Us</h4>
             <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {footerData?.address && (
-                <li style={{ display: 'flex', gap: '0.75rem', color: '#ccc' }}>
-                  <MapPin size={20} style={{ color: 'var(--brand-secondary)', flexShrink: 0 }} />
-                  <span>{footerData.address}</span>
+                <li style={{ display: 'flex', gap: '0.75rem', color: '#ffffff', alignItems: 'flex-start' }}>
+                  <MapPin size={18} style={{ color: '#ffffff', flexShrink: 0, marginTop: '3px' }} />
+                  <span style={{ fontSize: '0.95rem', lineHeight: 1.5 }}>{footerData.address}</span>
                 </li>
               )}
               {footerData?.phone && (
-                <li style={{ display: 'flex', gap: '0.75rem', color: '#ccc' }}>
-                  <Phone size={20} style={{ color: 'var(--brand-secondary)', flexShrink: 0 }} />
-                  <a href={`tel:${footerData.phone}`} style={{ color: 'inherit' }}>{footerData.phone}</a>
+                <li style={{ display: 'flex', gap: '0.75rem', color: '#ffffff', alignItems: 'center' }}>
+                  <Phone size={18} style={{ color: '#ffffff', flexShrink: 0 }} />
+                  <a href={`tel:${footerData.phone}`} style={{ color: '#ffffff', fontSize: '0.95rem' }}>{footerData.phone}</a>
                 </li>
               )}
               {footerData?.email && (
-                <li style={{ display: 'flex', gap: '0.75rem', color: '#ccc' }}>
-                  <Mail size={20} style={{ color: 'var(--brand-secondary)', flexShrink: 0 }} />
-                  <a href={`mailto:${footerData.email}`} style={{ color: 'inherit' }}>{footerData.email}</a>
+                <li style={{ display: 'flex', gap: '0.75rem', color: '#ffffff', alignItems: 'center' }}>
+                  <Mail size={18} style={{ color: '#ffffff', flexShrink: 0 }} />
+                  <a href={`mailto:${footerData.email}`} style={{ color: '#ffffff', fontSize: '0.95rem' }}>{footerData.email}</a>
+                </li>
+              )}
+              {footerData?.whatsapp && (
+                <li style={{ display: 'flex', gap: '0.75rem', color: '#ffffff', alignItems: 'center' }}>
+                  <Phone size={18} style={{ color: '#ffffff', flexShrink: 0 }} />
+                  <a href={`https://wa.me/${footerData.whatsapp}`} target="_blank" rel="noreferrer" style={{ color: '#ffffff', fontSize: '0.95rem' }}>WhatsApp</a>
                 </li>
               )}
             </ul>
+
+            {/* Social links */}
+            {(footerData?.facebook || footerData?.twitter || footerData?.linkedin) && (
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                {footerData.facebook && (
+                  <a href={footerData.facebook} target="_blank" rel="noreferrer"
+                    style={{ color: '#ffffff', fontSize: '0.875rem', fontWeight: 500 }}>Facebook</a>
+                )}
+                {footerData.twitter && (
+                  <a href={footerData.twitter} target="_blank" rel="noreferrer"
+                    style={{ color: '#ffffff', fontSize: '0.875rem', fontWeight: 500 }}>Twitter</a>
+                )}
+                {footerData.linkedin && (
+                  <a href={footerData.linkedin} target="_blank" rel="noreferrer"
+                    style={{ color: '#ffffff', fontSize: '0.875rem', fontWeight: 500 }}>LinkedIn</a>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Map column */}
+          <div>
+            <h4 style={{ color: '#ffffff', marginBottom: '1.25rem', fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Find Us</h4>
+            {footerData?.map_embed ? (
+              <div
+                dangerouslySetInnerHTML={{ __html: footerData.map_embed }}
+                style={{ borderRadius: '8px', overflow: 'hidden', lineHeight: 0 }}
+              />
+            ) : (
+              <div style={{ borderRadius: '8px', overflow: 'hidden', lineHeight: 0 }}>
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d254503.14786388068!2d-0.3536484!3d5.6036999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b7a773%3A0xbed14ed8650e2dd3!2sAccra%2C%20Ghana!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+                  width="100%"
+                  height="200"
+                  style={{ border: 0, display: 'block' }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Torchbearers Mission Location"
+                />
+              </div>
+            )}
           </div>
         </div>
-        
-        <div style={{ borderTop: '1px solid #333', paddingTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <p style={{ color: '#888', margin: 0, fontSize: '0.875rem' }}>
+      </div>
+
+      {/* Bottom bar */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)', padding: '1.25rem 0' }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <p style={{ color: '#ffffff', margin: 0, fontSize: '0.875rem' }}>
             &copy; {new Date().getFullYear()} Torchbearers Mission Incorporated. All rights reserved.
           </p>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            {footerData?.facebook && <a href={footerData.facebook} target="_blank" rel="noreferrer" style={{ color: '#ccc' }}>Facebook</a>}
-            {footerData?.twitter && <a href={footerData.twitter} target="_blank" rel="noreferrer" style={{ color: '#ccc' }}>Twitter</a>}
-            {footerData?.linkedin && <a href={footerData.linkedin} target="_blank" rel="noreferrer" style={{ color: '#ccc' }}>LinkedIn</a>}
-          </div>
+          <p style={{ color: 'rgba(255,255,255,0.6)', margin: 0, fontSize: '0.8rem' }}>
+            Raising and sending missionaries everywhere.
+          </p>
         </div>
       </div>
     </footer>
