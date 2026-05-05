@@ -219,7 +219,7 @@ const Footer = ({ footerData }: { footerData: FooterContent | null }) => {
             <h4 style={heading}>Our Location</h4>
             <div
               dangerouslySetInnerHTML={{ __html: mapEmbed }}
-              style={{ borderRadius: '8px', overflow: 'hidden', lineHeight: 0, flex: 1 }}
+              style={{ borderRadius: '8px', overflow: 'hidden', lineHeight: 0, height: '200px' }}
             />
           </div>
 
