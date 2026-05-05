@@ -1,0 +1,123 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- ================= ABOUT HERO ================= -->
+<section class="about-hero page-hero">
+  <div class="container text-center page-hero-content">
+    <h1>About Us</h1>
+    <p>Learn more about our mission, faith, and people</p>
+  </div>
+</section>
+
+<!-- ================= WHO WE ARE ================= -->
+{% if who %}
+<section class="py-5">
+  <div class="container">
+
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">{{ who.title }}</h2>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="lead text-center">
+          {{ who.content|safe }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endif %}
+
+<!-- ================= VISION & STATEMENT ================= -->
+{% if mv %}
+<section class="vision-section py-5">
+  <div class="container">
+
+    <div class="row g-4 align-items-stretch">
+
+      <!-- Vision & Purpose -->
+      <div class="col-md-6">
+        <div class="vision-card h-100 animate-on-scroll">
+          <h3 class="vision-title">Our Vision &amp; Purpose</h3>
+          <div class="vision-text">
+            {{ mv.vision_and_purpose|safe }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Statement of Faith -->
+      <div class="col-md-6">
+        <div class="vision-card vision-card-alt h-100 animate-on-scroll faith-card">
+          <h3 class="vision-title">Statement of Faith</h3>
+          <div class="vision-text">
+            {{ mv.statement_of_faith|safe }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+{% endif %}
+
+<!-- ================= TEAM ================= -->
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+<section class="team-section py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Our Team</h2>
+      <p class="text-muted">
+        Meet the dedicated leaders and servants behind Torchbearers Mission Incorporated.
+      </p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {% for member in team %}
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+        <div class="team-card card border-0 shadow-sm">
+          {% if member.photo %}
+          <div class="team-img-wrapper">
+            <img
+              src="{{ member.photo.url }}"
+              alt="{{ member.name }}"
+              class="team-img">
+          </div>
+          {% endif %}
+          <div class="card-body text-center">
+            <h5 class="mb-1">{{ member.name }}</h5>
+            <p class="team-role mb-3">{{ member.role }}</p>
+            <div class="d-flex justify-content-center gap-3 team-socials">
+              {% if member.facebook %}
+                <a href="{{ member.facebook }}" target="_blank">
+                  <i class="bi bi-facebook"></i>
+                </a>
+              {% endif %}
+              {% if member.twitter %}
+                <a href="{{ member.twitter }}" target="_blank">
+                  <i class="bi bi-twitter-x"></i>
+                </a>
+              {% endif %}
+              {% if member.linkedin %}
+                <a href="{{ member.linkedin }}" target="_blank">
+                  <i class="bi bi-linkedin"></i>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+        <p class="text-center text-muted">Team information coming soon.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+

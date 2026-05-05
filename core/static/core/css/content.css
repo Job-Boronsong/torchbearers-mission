@@ -1,0 +1,63 @@
+/* =========================
+   SHARED CONTENT STYLES
+   Used by frontend + editor
+   ========================= */
+
+.content {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #1f2937;
+}
+
+/* Headings */
+.content h2 {
+  font-size: 1.7rem;
+  margin: 2.5rem 0 1rem;
+}
+
+.content h3 {
+  font-size: 1.35rem;
+  margin: 2rem 0 0.75rem;
+}
+
+/* Paragraphs */
+.content p {
+  margin-bottom: 1.4rem;
+}
+
+/* Images */
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 2rem 0;
+}
+
+/* Blockquotes / callouts */
+.content blockquote {
+  border-left: 4px solid #7c3aed;
+  padding: 1rem 1.25rem;
+  background: #f5f3ff;
+  margin: 2rem 0;
+  border-radius: 6px;
+  font-style: italic;
+}
+
+/* Tables */
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+.content th,
+.content td {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+}
+
+.content th {
+  background: #f9fafb;
+  font-weight: 600;
+}

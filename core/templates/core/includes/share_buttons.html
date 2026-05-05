@@ -1,0 +1,30 @@
+<div class="share-box mt-5 pt-4 border-top">
+  <p class="fw-bold mb-2">Share this article:</p>
+
+  {% with request.build_absolute_uri as share_url %}
+  <div class="d-flex gap-3 flex-wrap">
+
+    <a href="https://wa.me/?text={{ share_url }}"
+       class="btn btn-success btn-sm" target="_blank">
+      <i class="bi bi-whatsapp"></i> WhatsApp
+    </a>
+
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}"
+       class="btn btn-primary btn-sm" target="_blank">
+      <i class="bi bi-facebook"></i> Facebook
+    </a>
+
+    <a href="https://twitter.com/intent/tweet?url={{ share_url }}"
+       class="btn btn-dark btn-sm" target="_blank">
+      <i class="bi bi-twitter-x"></i>
+    </a>
+
+    <a href="mailto:?body={{ share_url }}"
+       class="btn btn-secondary btn-sm">
+      <i class="bi bi-envelope"></i> Email
+    </a>
+
+  </div>
+  {% endwith %}
+</div>
+

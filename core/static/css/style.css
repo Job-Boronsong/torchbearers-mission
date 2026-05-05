@@ -379,3 +379,69 @@ body {
   font-size: 1rem;
 }
 
+
+
+/* CKEDITOR BLOG STYLING */
+.blog-content {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 14px;
+  line-height: 1.8;
+  font-family: 'Segoe UI', sans-serif;
+  color: #2c3e50;
+}
+
+/* HEADINGS */
+.blog-content h2 {
+  font-size: 34px;
+  color: #0f4c66;
+  margin-bottom: 10px;
+}
+
+.blog-content h3 {
+  font-size: 22px;
+  color: #1f7aa8;
+  margin-top: 35px;
+  margin-bottom: 10px;
+}
+
+/* PARAGRAPH */
+.blog-content p {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+/* LIST */
+.blog-content ul {
+  padding-left: 22px;
+  margin-bottom: 20px;
+}
+
+.blog-content li {
+  margin-bottom: 8px;
+}
+
+/* DIVIDER */
+.blog-content hr {
+  border: none;
+  height: 2px;
+  background: #e6edf3;
+  margin: 40px 0;
+}
+
+/* TAGLINE */
+.blog-content em {
+  display: block;
+  font-style: italic;
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+/* OPTIONAL: make images nice */
+.blog-content img {
+  width: 100%;
+  border-radius: 10px;
+  margin: 20px 0;
+}

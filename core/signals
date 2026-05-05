@@ -1,0 +1,17 @@
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+
+@receiver(user_logged_in)
+def mark_password_change_required(sender, request, user, **kwargs):
+    profile = getattr(user, "userprofile", None)
+    if profile:
+        # Force password change on first login only
+        if profile.must_change_password:
+            request.session["force_password_change"] = True
+
+
+@receiver(user_logged_in)
+def unlock_after_reset(sender, user, request, **kwargs):
+    if hasattr(user, "userprofile"):
+        user.userprofile.must_change_password = False
+        user.userprofile.save()

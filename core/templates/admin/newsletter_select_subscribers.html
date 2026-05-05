@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Send Newsletter: {{ newsletter.title }}</h1>
+
+<form method="post">
+  {% csrf_token %}
+
+  <table class="admin-table">
+    {% for sub in subscribers %}
+      <tr>
+        <td>
+          <input type="checkbox" name="subscribers" value="{{ sub.id }}">
+        </td>
+        <td>{{ sub.email }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <br>
+  <input type="submit" class="default" value="Send Newsletter">
+</form>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+<article class="content-layout container py-5">
+
+  <h1 class="content-title text-center mb-4">{{ title }}</h1>
+
+  {% if featured_image %}
+    <div class="text-center mb-4">
+      <img src="{{ featured_image.url }}" class="content-featured">
+    </div>
+  {% endif %}
+
+  <div class="content-body">
+    {{ content|safe }}
+  </div>
+
+  {% include "core/includes/share_buttons.html" %}
+
+  {% if show_cta %}
+    {% include "core/includes/support_cta.html" %}
+  {% endif %}
+
+</article>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ post.title }}</title>
+
+  <style>
+    body {
+      font-family: "Georgia", serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      margin: 40px;
+      color: #111;
+    }
+
+    h1 {
+      font-size: 26pt;
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      color: #666;
+      font-size: 10pt;
+      margin-bottom: 30px;
+    }
+
+    img {
+      max-width: 100%;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>{{ post.title }}</h1>
+
+  <div class="meta">
+    {{ post.created_at|date:"F d, Y" }}
+  </div>
+
+  {{ post.content|safe }}
+</body>
+</html>

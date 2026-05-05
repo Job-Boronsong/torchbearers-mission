@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Donate | Torchbearers Missions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #2c5aa0;
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .donate-btn {
+      background-color: #c0392b;
+      color: #fff;
+      padding: 14px 28px;
+      font-size: 18px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .donate-btn:hover {
+      background-color: #a93226;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Support Torchbearers Missions</h1>
+
+    <p>
+      Your generous support helps us spread the Gospel, support communities,
+      and advance the work of the Kingdom. Every gift makes a difference.
+    </p>
+
+    <button class="donate-btn" onclick="openDonateModal()">
+      ❤️ Donate Now
+    </button>
+  </div>
+
+  <!-- ✅ LOAD POPUP SCRIPT FIRST -->
+  <script src="{% static 'js/donate.js' %}"></script>
+
+  <!-- ✅ AUTO-OPEN AFTER SCRIPT IS LOADED -->
+  <script>
+    window.addEventListener("load", function () {
+      if (typeof window.openDonateModal === "function") {
+        window.openDonateModal();
+      } else {
+        console.error("openDonateModal() is not defined");
+      }
+    });
+  </script>
+
+</body>
+</html>
+

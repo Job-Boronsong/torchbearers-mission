@@ -1,9 +1,14 @@
-<div class="modal fade" id="volunteerModal" tabindex="-1">
+{% load static %}
+
+<div class="modal fade" id="volunteerModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
 
       <form method="post" action="{% url 'core:register_volunteer' %}">
         {% csrf_token %}
+
+        <!-- Honeypot -->
+        <input type="text" name="website" style="display:none">
 
         <div class="modal-header">
           <h5 class="modal-title">Become a Volunteer</h5>
@@ -11,38 +16,34 @@
         </div>
 
         <div class="modal-body">
+          <input type="text" name="full_name" class="form-control mb-3"
+                 required placeholder="Full Name">
 
-          <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input type="text" name="full_name" class="form-control" required>
+          <input type="email" name="email" class="form-control mb-3"
+                 required placeholder="Email">
+
+          <input type="text" name="phone" class="form-control mb-3"
+                 placeholder="Phone">
+
+          <textarea name="message" class="form-control mb-3"
+                    rows="3" placeholder="Message"></textarea>
+
+          <!-- ✅ Cloudflare Turnstile -->
+          <div class="cf-turnstile"
+               data-sitekey="{{ CLOUDFLARE_TURNSTILE_SITE_KEY }}">
           </div>
-
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Phone</label>
-            <input type="text" name="phone" class="form-control" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Message</label>
-            <textarea name="message" class="form-control"></textarea>
-          </div>
-
         </div>
 
         <div class="modal-footer">
-          <!-- THIS BUTTON IS CRITICAL -->
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary w-100">
             Submit
           </button>
         </div>
-
       </form>
 
     </div>
   </div>
 </div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+

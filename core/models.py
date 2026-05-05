@@ -1,6 +1,14 @@
+from django_ckeditor_5.fields import CKEditor5Field
+from ckeditor_uploader.fields import RichTextUploadingField
+from django.contrib.auth.models import User
 from django.db import models
+import uuid
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.text import slugify
-from django.utils.html import mark_safe
+from django.utils import timezone
+from django.utils.html import mark_safe, strip_tags
 from .utils.image import optimize_image
 from PIL import Image
 from io import BytesIO
@@ -23,16 +31,20 @@ class MissionVision(models.Model):
 # Projects
 # =========================
 class Project(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
-    description = models.TextField()
-    image = models.ImageField(upload_to='projects/')
+    description = CKEditor5Field("Description", config_name="default")
+    excerpt = models.TextField(blank=True, help_text="Short summary shown on project listings (auto-generated if empty).")
+    feature_image = models.ImageField(upload_to='projects/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    show_donate = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+        if not self.excerpt and self.description:
+            plain_text = strip_tags(self.description)
+            self.excerpt = " ".join(plain_text.split()[:30])
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -45,10 +57,20 @@ class Project(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
-    content = models.TextField()
-    image = models.ImageField(upload_to='blog/')
+    content = RichTextUploadingField()
+    feature_image = models.ImageField(upload_to='blog/', blank=True, null=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="blog_posts"
+    )
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    seo_title = models.CharField(max_length=60, blank=True, help_text="Recommend: 50-60 characters")
+    seo_description = models.CharField(max_length=160, blank=True, help_text="Recommend: 150-160 characters")
+
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -60,11 +82,11 @@ class BlogPost(models.Model):
 
 
 # =========================
-# Volunteers (ONLY ONCE ✅)
+# Volunteers 
 # =========================
 class Volunteer(models.Model):
     full_name = models.CharField(max_length=200)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30)
     message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -121,19 +143,19 @@ class ContactMessage(models.Model):
 # =========================
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)
-    role = models.CharField(max_length=150)
-    photo = models.ImageField(upload_to='team/')
+    role = models.CharField(max_length=100)
+    photo = models.ImageField(upload_to='team/', blank=True, null=True)
+    facebook = models.URLField(blank=True, null=True)
+    twitter = models.URLField(blank=True, null=True)
+    linkedin = models.URLField(blank=True, null=True)
+    order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    class Meta:
+        ordering = ["order"]
 
-        img = Image.open(self.photo.path)
-
-        if img.height > 600 or img.width > 600:
-            img.thumbnail((600, 600))
-            img.save(self.photo.path)
-
+    def __str__(self):
+        return self.name
 
 # =========================
 # Footer Content
@@ -141,7 +163,7 @@ class TeamMember(models.Model):
 class FooterContent(models.Model):
     address = models.CharField(max_length=255)
     email = models.EmailField()
-    phone = models.CharField(max_length=30)
+    phone = models.CharField(max_length=255)
 
     whatsapp = models.CharField(
         max_length=20,
@@ -160,7 +182,7 @@ class FooterContent(models.Model):
         return "Footer Content"
 
 
-# core/models.py
+
 class Article(models.Model):
     CATEGORY_CHOICES = (
         ('blog', 'Blog'),
@@ -231,3 +253,95 @@ class CarouselSlide(models.Model):
 
 
 
+class WhoWeAre(models.Model):
+    title = models.CharField(
+        max_length=200,
+        default="Who We Are"
+    )
+
+    content = models.TextField(
+        help_text="Main description for Who We Are section"
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Who We Are"
+        verbose_name_plural = "Who We Are"
+
+    def __str__(self):
+        return self.title
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    must_change_password = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.user.username
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+class LoginAudit(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    successful = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.user} @ {self.timestamp}"
+
+
+class NewsletterSubscriber(models.Model):
+    first_name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(unique=True)
+    is_active = models.BooleanField(default=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    unsubscribe_token = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    def __str__(self):
+        return self.email
+
+
+class Newsletter(models.Model):
+    title = models.CharField(max_length=200)
+    subject = models.CharField(max_length=255)
+    body = models.TextField(help_text="HTML content only (no <html> or <body>)")
+    week_number = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+
+class NewsletterClick(models.Model):
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
+    subscriber = models.ForeignKey(NewsletterSubscriber, on_delete=models.CASCADE)
+    url = models.URLField()
+    clicked_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.subscriber.email} clicked {self.url}"
+
+
+
+class NewsletterOpen(models.Model):
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
+    subscriber = models.ForeignKey(NewsletterSubscriber, on_delete=models.CASCADE)
+    opened_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("newsletter", "subscriber")
+
+    def __str__(self):
+        return f"{self.subscriber.email} opened {self.newsletter.title}"

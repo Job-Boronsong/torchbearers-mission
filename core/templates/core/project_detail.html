@@ -1,94 +1,73 @@
-{% extends 'core/base.html' %}
+{% extends "core/base.html" %}
 {% load static %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-10 mx-auto">
+<section class="content-layout container py-5">
 
-    <!-- PROJECT TITLE -->
-    <h1 class="fw-bold mb-3">{{ project.title }}</h1>
+  <h1 class="content-title mb-3">{{ project.title }}</h1>
 
-    <!-- PROJECT IMAGE -->
-    {% if project.image %}
-      <img src="{{ project.image.url }}"
-           class="img-fluid rounded mb-4"
-           alt="{{ project.title }}">
-    {% endif %}
+  {% if project.feature_image %}
+  <img
+    src="{{ project.feature_image.url }}"
+    alt="{{ project.title }}"
+    class="card-img-top"
+    style="
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: cntain;
+      display: block;
+    "
+  >
+{% elif project.image %}
+  <img
+    src="{{ project.image.url }}"
+    alt="{{ project.title }}"
+    class="card-img-top"
+    style="
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: center;
+    "
+  >
+{% else %}
+  <img
+    src="{% static 'images/project-placeholder.jpg' %}"
+    alt="Project image"
+    class="card-img-top"
+    style="
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: center;
+    "
+  >
+{% endif %}
 
-    <!-- PROJECT DESCRIPTION -->
-    <p class="lead">
-      {{ project.description }}
-    </p>
-
-    <!-- ================= SHARE BAR ================= -->
-    <div class="share-box mt-4 mb-5">
-      <span class="share-label">Share this article:</span>
-
-      <div class="share-buttons">
-
-        <!-- WhatsApp -->
-        <a class="share-btn whatsapp"
-           href="https://wa.me/?text={{ request.build_absolute_uri }}"
-           target="_blank">
-          <i class="bi bi-whatsapp"></i>
-          <span>WhatsApp</span>
-        </a>
-
-        <!-- Facebook -->
-        <a class="share-btn facebook"
-           href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
-           target="_blank">
-          <i class="bi bi-facebook"></i>
-          <span>Facebook</span>
-        </a>
-
-        <!-- X (icon only) -->
-        <a class="share-btn x"
-           href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ project.title }}"
-           target="_blank"
-           aria-label="Share on X">
-          <i class="bi bi-twitter-x"></i>
-        </a>
-
-        <!-- Email -->
-        <a class="share-btn email"
-           href="mailto:?subject={{ project.title }}&body={{ request.build_absolute_uri }}">
-          <i class="bi bi-envelope-fill"></i>
-          <span>Email</span>
-        </a>
-
-      </div>
-    </div>
-    <!-- ================= END SHARE BAR ================= -->
-
-
-    <!-- ================= DONATE CTA ================= -->
-    <div class="donate-box text-center py-5 mb-4">
-      <h3 class="fw-bold mb-3">
-        Support This Project
-      </h3>
-
-      <p class="text-muted mb-4">
-        Your donation helps us expand this work and reach more lives.
-      </p>
-
-      <!-- Donate Button -->
-      <a href="#"
-         class="btn btn-success btn-lg px-5"
-         data-bs-toggle="modal"
-         data-bs-target="#donateModal">
-        ❤️ Donate to This Project
-      </a>
-    </div>
-    <!-- ================= END DONATE CTA ================= -->
-
-
-    <!-- BACK LINK -->
-    <a href="{% url 'core:project_list' %}"
-       class="btn btn-outline-secondary mt-2">
-      ← Back to Projects
-    </a>
-
+  <div class="content-body">
+    {{ project.description|safe }}
   </div>
-</div>
+
+  {% include "core/includes/share_buttons.html" %}
+
+  {% if project.show_donate %}
+  <div class="mt-5 text-center">
+    <h3>Support This Project</h3>
+    <p>Your donation helps us expand this work and reach more lives.</p>
+
+    <button class="btn btn-success btn-lg"
+            data-bs-toggle="modal"
+            data-bs-target="#donateModal">
+      ❤️ Donate to This Project
+    </button>
+  </div>
+  {% endif %}
+
+  <a href="{% url 'core:project_list' %}" class="btn btn-outline-secondary mt-4">
+    ← Back to Projects
+  </a>
+
+</section>
 {% endblock %}
+

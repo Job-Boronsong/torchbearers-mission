@@ -1,0 +1,112 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="row gy-4">
+
+      <!-- CONTACT -->
+      <div class="col-lg-3 col-md-6">
+        <h5>Contact Us</h5>
+
+        {% if footer.address %}
+        <p>
+          <i class="bi bi-geo-alt-fill"></i>
+          {{ footer.address }}
+        </p>
+        {% endif %}
+
+        {% if footer.email %}
+        <p>
+          <i class="bi bi-envelope-fill"></i>
+          <a href="mailto:{{ footer.email }}">{{ footer.email }}</a>
+        </p>
+        {% endif %}
+
+        {% if footer.phone %}
+        <p>
+          <i class="bi bi-telephone-fill"></i>
+          {{ footer.phone }}
+        </p>
+        {% endif %}
+
+        {% if footer.whatsapp %}
+        <p>
+          <i class="bi bi-whatsapp"></i>
+          <a href="https://wa.me/{{ footer.whatsapp }}" target="_blank">
+            {{ footer.whatsapp }}
+          </a>
+        </p>
+        {% endif %}
+
+        <div class="footer-social mt-3">
+          {% if footer.facebook %}
+          <a href="{{ footer.facebook }}" target="_blank"><i class="bi bi-facebook"></i></a>
+          {% endif %}
+          {% if footer.twitter %}
+          <a href="{{ footer.twitter }}" target="_blank"><i class="bi bi-twitter-x"></i></a>
+          {% endif %}
+          {% if footer.linkedin %}
+          <a href="{{ footer.linkedin }}" target="_blank"><i class="bi bi-linkedin"></i></a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div class="col-lg-4 col-md-6">
+        <h5>Our Location</h5>
+        <div class="map-container">
+          {% if footer.map_embed %}
+            {{ footer.map_embed|safe }}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div class="col-lg-2 col-md-6">
+        <h5>Quick Links</h5>
+        <ul class="footer-links">
+          <li><a href="{% url 'core:home' %}">Home</a></li>
+          <li><a href="{% url 'core:about' %}">About</a></li>
+          <li><a href="{% url 'core:project_list' %}">Projects</a></li>
+          <li><a href="{% url 'core:blog_list' %}">Blog</a></li>
+          <li><a href="{% url 'core:contact' %}">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- NEWSLETTER -->
+<div class="col-lg-3 col-md-6">
+  <h5 class="fw-bold mb-3">Newsletter</h5>
+  <p class="small text-muted">
+    Get updates on missions and projects.
+  </p>
+
+  <form
+    method="post"
+    action="{% url 'core:newsletter_subscribe' %}"
+    class="d-flex gap-2 footer-newsletter"
+  >
+    {% csrf_token %}
+
+    <input
+      type="email"
+      name="email"
+      class="form-control"
+      placeholder="Your email"
+      required
+    >
+
+    <button
+      type="submit"
+      class="btn btn-warning fw-semibold"
+    >
+      Subscribe
+    </button>
+  </form>
+</div>
+
+
+
+    <div class="footer-bottom text-center">
+      © {% now "Y" %} Torchbearers Mission Incorporated. All rights reserved.
+    </div>
+  </div>
+</footer>
+

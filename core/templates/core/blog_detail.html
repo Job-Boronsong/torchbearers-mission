@@ -1,90 +1,86 @@
-{% extends 'core/base.html' %}
+{% extends "core/base.html" %}
 {% load static %}
 
-{# ================= SEO BLOCKS ================= #}
+{% block head %}
+<title>{{ post.seo_title|default:post.title }}</title>
 
-{% block title %}
-{{ post.title }} | Torchbearers Missions
-{% endblock %}
-
-{% block meta %}
-<meta name="description" content="{{ post.content|striptags|truncatewords:25 }}">
+<meta name="description" content="{{ post.seo_description|default:post.title }}">
 
 <!-- Open Graph -->
-<meta property="og:title" content="{{ post.title }}">
-<meta property="og:description" content="{{ post.content|striptags|truncatewords:25 }}">
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
 <meta property="og:type" content="article">
+<meta property="og:title" content="{{ post.seo_title|default:post.title }}">
+<meta property="og:description" content="{{ post.seo_description|default:post.title }}">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% if post.feature_image %}
+<meta property="og:image" content="{{ post.feature_image.url }}">
+{% endif %}
 
-<!-- Twitter / X -->
+<!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ post.title }}">
-<meta name="twitter:description" content="{{ post.content|striptags|truncatewords:25 }}">
-<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}">
+<meta name="twitter:title" content="{{ post.seo_title|default:post.title }}">
+<meta name="twitter:description" content="{{ post.seo_description|default:post.title }}">
+{% if post.feature_image %}
+<meta name="twitter:image" content="{{ post.feature_image.url }}">
+{% endif %}
 {% endblock %}
-
-{# ================= PAGE CONTENT ================= #}
 
 {% block content %}
-<div class="container my-5">
+<section class="blog-page">
 
-  <div class="article-container mx-auto">
+  {% if post.feature_image %}
+  <div
+    class="blog-hero"
+    style="
+      width:100%;
+      height:320px;
+      margin-top:24px;
+      overflow:hidden;
+    "
+  >
+    <img
+      src="{{ post.feature_image.url }}"
+      alt="{{ post.title }}"
+      style="
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        object-position:center;
+        display:block;
+      "
+    >
+  </div>
+  {% endif %}
 
-    <h1 class="article-title mb-2">{{ post.title }}</h1>
+  <div class="blog-wrapper">
+    <div
+      class="blog-container"
+      style="padding:56px 48px;"
+    >
+      <h1 class="blog-title">{{ post.title }}</h1>
 
-    <p class="text-muted mb-4">
-      {{ post.created_at|date:"F d, Y" }}
-    </p>
+      <p class="blog-meta">
+        By {{ post.author.get_full_name|default:post.author.username }}
+        · {{ post.created_at|date:"F d, Y" }}
+      </p>
 
-    <img src="{{ post.image.url }}"
-         class="img-fluid rounded mb-4"
-         style="max-height: 420px; object-fit: cover; width: 100%;"
-         alt="{{ post.title }}">
 
-    <div class="article-body">
-      {{ post.content|linebreaks }}
+      <div id="toc" class="toc"></div>
+
+      <!-- IMPORTANT: shared content styles -->
+      <article id="post-content" class="content">
+        {{ post.content|safe }}
+      </article>
+
+      {% include "core/includes/share_buttons.html" %}
+
+      <a href="{% url 'core:blog_list' %}" class="btn btn-outline-secondary mt-5">
+        ← Back to Blog
+      </a>
     </div>
-
-    <!-- SHARE BUTTONS -->
-    <div class="mt-5 pt-4 border-top">
-      <p class="fw-bold mb-2">Share this article:</p>
-
-      {% with request.build_absolute_uri as share_url %}
-      <div class="d-flex gap-3 flex-wrap">
-
-        <a href="https://wa.me/?text={{ post.title }}%20{{ share_url }}"
-           target="_blank"
-           class="btn btn-success btn-sm">
-          <i class="bi bi-whatsapp"></i> WhatsApp
-        </a>
-
-        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}"
-           target="_blank"
-           class="btn btn-primary btn-sm">
-          <i class="bi bi-facebook"></i> Facebook
-        </a>
-
-        <a href="https://twitter.com/intent/tweet?text={{ post.title }}&url={{ share_url }}"
-           target="_blank"
-           class="btn btn-dark btn-sm">
-          <i class="bi bi-twitter-x"></i> 
-        </a>
-
-        <a href="mailto:?subject={{ post.title }}&body={{ share_url }}"
-           class="btn btn-secondary btn-sm">
-          <i class="bi bi-envelope"></i> Email
-        </a>
-
-      </div>
-      {% endwith %}
-    </div>
-
-    <a href="{% url 'core:blog_list' %}" class="btn btn-outline-secondary mt-4">
-      ← Back to Blog
-    </a>
-
   </div>
 
-</div>
+</section>
+
+<script src="{% static 'js/toc.js' %}"></script>
 {% endblock %}
+
