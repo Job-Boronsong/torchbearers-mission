@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Open+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@700;900&family=Open+Sans:wght@400;500;600&display=swap');
 
 :root {
   /* Brand palette derived from the Torchbearers logo */
@@ -19,7 +19,7 @@
   --border-color: #d0dbe8;
   --border-focus: #1c5fa5;
 
-  --font-heading: 'Playfair Display', serif;
+  --font-heading: 'Lato', sans-serif;
   --font-body: 'Open Sans', sans-serif;
 
   --shadow-sm: 0 2px 4px rgba(43, 43, 43, 0.05);
