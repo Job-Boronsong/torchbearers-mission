@@ -29,16 +29,16 @@ function DonateModal({ onClose }: { onClose: () => void }) {
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '520px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', overflow: 'hidden' }}
+        style={{ backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '520px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', overflow: 'hidden' }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#111' }}>Support Torchbearers Missions</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.4rem', color: '#6b7280', lineHeight: 1 }}>×</button>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <p style={{ margin: 0, color: '#4b5563', fontSize: '0.95rem' }}>
             Thank you for supporting our mission. You can donate using the details below:
           </p>

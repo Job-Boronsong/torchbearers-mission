@@ -4,11 +4,13 @@ import { Menu, X, Mail, Phone, MapPin, Heart } from 'lucide-react';
 import { getFooter, subscribeNewsletter } from '../api';
 import type { FooterContent } from '../api';
 import { useDonate } from '../context/DonateModalContext';
+import { useVolunteer } from '../context/VolunteerModalContext';
 
 const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { openDonate } = useDonate();
+  const { openVolunteer } = useVolunteer();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -41,7 +43,7 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
             )}
           </div>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <Link to="/volunteer" style={{ color: 'inherit', fontWeight: 500 }}>Volunteer With Us</Link>
+            <button onClick={openVolunteer} style={{ background: 'none', border: 'none', color: 'inherit', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>Volunteer With Us</button>
           </div>
         </div>
       </div>
