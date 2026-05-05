@@ -68,7 +68,7 @@ admin.site.index_title = "Welcome to Torchbearers Missions Dashboard"
 @admin.register(MissionVision)
 class MissionVisionAdmin(admin.ModelAdmin):
     list_display = ("__str__", "updated_at")
-    fields = ("hero_image", "vision_and_purpose", "statement_of_faith")
+    fields = ("hero_image", "hero_title", "hero_subtitle", "vision_and_purpose", "statement_of_faith")
 
 
 # =====================================================

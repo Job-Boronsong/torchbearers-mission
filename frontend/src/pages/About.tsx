@@ -54,10 +54,14 @@ export default function About() {
           />
         )}
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <h1 className="h1" style={{ color: 'var(--text-light)', marginBottom: '1rem' }}>About Us</h1>
-          <p className="h4" style={{ opacity: 0.9, maxWidth: '600px', margin: '0 auto' }}>
-            A community dedicated to shining light in dark places.
-          </p>
+          <h1 className="h1" style={{ color: 'var(--text-light)', marginBottom: '1rem' }}>
+            {data?.mission_vision?.hero_title || 'About Us'}
+          </h1>
+          {(data?.mission_vision?.hero_subtitle) && (
+            <p className="h4" style={{ opacity: 0.9, maxWidth: '600px', margin: '0 auto' }}>
+              {data.mission_vision.hero_subtitle}
+            </p>
+          )}
         </div>
       </section>
 

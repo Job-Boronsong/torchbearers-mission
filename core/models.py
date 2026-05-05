@@ -20,6 +20,8 @@ from django.core.files.base import ContentFile
 # =========================
 class MissionVision(models.Model):
     hero_image = models.ImageField(upload_to='about/', blank=True, null=True, help_text="Background image for the About Us hero section")
+    hero_title = models.CharField(max_length=200, default="About Us", help_text="Main heading shown on the About Us hero")
+    hero_subtitle = models.CharField(max_length=400, blank=True, default="A community dedicated to shining light in dark places.", help_text="Subtitle shown below the heading")
     vision_and_purpose = models.TextField()
     statement_of_faith = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
