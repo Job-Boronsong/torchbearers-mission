@@ -1,0 +1,240 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}About Us Page — Admin{% endblock %}
+
+{% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="messagelist">
+      <p class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</p>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<h1 style="margin-bottom:1.5rem;">About Us Page</h1>
+
+<form method="post" enctype="multipart/form-data" id="about-us-form">
+  {% csrf_token %}
+  {{ team_formset.management_form }}
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 1 — HERO
+  ═══════════════════════════════════════════════ -->
+  <div class="module" style="margin-bottom:2rem;">
+    <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
+      Hero Section
+    </h2>
+    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+
+      <!-- Hero Image -->
+      <div class="form-row" style="margin-bottom:1.2rem;">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Hero Background Image</label>
+        {% if mv_form.instance.hero_image %}
+          <div style="margin-bottom:.5rem;">
+            <img src="{{ mv_form.instance.hero_image.url }}" style="max-height:120px;border-radius:6px;border:1px solid #ddd;" alt="Current hero image">
+            <label style="display:inline-flex;align-items:center;gap:.4rem;margin-left:1rem;font-size:.875rem;color:#555;">
+              <input type="checkbox" name="{{ mv_form.hero_image.html_name }}-clear"> Clear image
+            </label>
+          </div>
+        {% endif %}
+        {{ mv_form.hero_image }}
+        <p class="help" style="color:#666;font-size:.8rem;margin-top:.3rem;">{{ mv_form.hero_image.help_text }}</p>
+      </div>
+
+      <!-- Hero Title -->
+      <div class="form-row" style="margin-bottom:1.2rem;">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Hero Title</label>
+        {{ mv_form.hero_title }}
+        {% if mv_form.hero_title.errors %}<p style="color:red;">{{ mv_form.hero_title.errors }}</p>{% endif %}
+      </div>
+
+      <!-- Hero Subtitle -->
+      <div class="form-row">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Hero Subtitle</label>
+        {{ mv_form.hero_subtitle }}
+        {% if mv_form.hero_subtitle.errors %}<p style="color:red;">{{ mv_form.hero_subtitle.errors }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 2 — WHO WE ARE
+  ═══════════════════════════════════════════════ -->
+  <div class="module" style="margin-bottom:2rem;">
+    <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
+      Who We Are
+    </h2>
+    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+
+      <!-- Section Title -->
+      <div class="form-row" style="margin-bottom:1.2rem;">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Section Title</label>
+        {{ who_form.title }}
+        {% if who_form.title.errors %}<p style="color:red;">{{ who_form.title.errors }}</p>{% endif %}
+      </div>
+
+      <!-- Content -->
+      <div class="form-row">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Content</label>
+        {{ who_form.content }}
+        {% if who_form.content.errors %}<p style="color:red;">{{ who_form.content.errors }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 3 — MISSION & VISION
+  ═══════════════════════════════════════════════ -->
+  <div class="module" style="margin-bottom:2rem;">
+    <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
+      Mission &amp; Vision
+    </h2>
+    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+
+      <div class="form-row" style="margin-bottom:1.2rem;">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Vision &amp; Purpose</label>
+        {{ mv_form.vision_and_purpose }}
+        {% if mv_form.vision_and_purpose.errors %}<p style="color:red;">{{ mv_form.vision_and_purpose.errors }}</p>{% endif %}
+      </div>
+
+      <div class="form-row">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Statement of Faith</label>
+        {{ mv_form.statement_of_faith }}
+        {% if mv_form.statement_of_faith.errors %}<p style="color:red;">{{ mv_form.statement_of_faith.errors }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 4 — TEAM MEMBERS
+  ═══════════════════════════════════════════════ -->
+  <div class="module" style="margin-bottom:2rem;">
+    <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
+      Team Members
+    </h2>
+    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+
+      <div id="team-members-container">
+        {% for form in team_formset %}
+          <div class="team-member-row" style="border:1px solid #e0e0e0;border-radius:6px;padding:1.2rem;margin-bottom:1rem;background:#fafafa;position:relative;">
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}<p style="color:red;font-size:.8rem;">{{ form.name.errors }}</p>{% endif %}
+              </div>
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">Role</label>
+                {{ form.role }}
+                {% if form.role.errors %}<p style="color:red;font-size:.8rem;">{{ form.role.errors }}</p>{% endif %}
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">Facebook URL</label>
+                {{ form.facebook }}
+              </div>
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">Twitter URL</label>
+                {{ form.twitter }}
+              </div>
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">LinkedIn URL</label>
+                {{ form.linkedin }}
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:auto auto 1fr;gap:1.5rem;align-items:center;">
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">Order</label>
+                {{ form.order }}
+              </div>
+              <div style="display:flex;align-items:center;gap:.4rem;margin-top:1.2rem;">
+                {{ form.is_active }}
+                <label style="font-weight:600;font-size:.875rem;">Active</label>
+              </div>
+              <div>
+                <label style="font-weight:600;font-size:.875rem;">Photo</label>
+                {% if form.instance.photo %}
+                  <div style="margin-bottom:.4rem;">
+                    <img src="{{ form.instance.photo.url }}" style="height:60px;border-radius:4px;border:1px solid #ddd;" alt="">
+                  </div>
+                {% endif %}
+                {{ form.photo }}
+              </div>
+            </div>
+
+            {% if team_formset.can_delete %}
+              <div style="margin-top:.8rem;display:flex;align-items:center;gap:.4rem;">
+                {{ form.DELETE }}
+                <label style="color:#c0392b;font-size:.875rem;font-weight:600;">Remove this member</label>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button type="button" id="add-team-member"
+        style="margin-top:.5rem;padding:.5rem 1.2rem;background:#28a745;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.875rem;">
+        + Add Team Member
+      </button>
+    </div>
+  </div>
+
+  <!-- SAVE -->
+  <div style="display:flex;gap:1rem;align-items:center;margin-top:1rem;">
+    <input type="submit" value="Save About Us Page" class="default"
+      style="padding:.65rem 2rem;font-size:.95rem;cursor:pointer;">
+  </div>
+</form>
+
+<style>
+  input[type="text"], input[type="url"], input[type="number"], textarea, select {
+    width: 100%; box-sizing: border-box;
+    padding: .45rem .6rem; border: 1px solid #ccc; border-radius: 4px;
+    font-size: .875rem; margin-top: .2rem;
+  }
+  textarea { min-height: 120px; resize: vertical; }
+  input[type="checkbox"] { width: auto; }
+  input[type="file"] { border: none; padding: 0; }
+  .messagelist p { padding: .7rem 1rem; border-radius: 4px; }
+  .messagelist p.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .messagelist p.error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+</style>
+
+<script>
+(function () {
+  const container  = document.getElementById('team-members-container');
+  const addBtn     = document.getElementById('add-team-member');
+  const totalInput = document.querySelector('[name="team-TOTAL_FORMS"]');
+
+  addBtn.addEventListener('click', function () {
+    const forms  = container.querySelectorAll('.team-member-row');
+    const idx    = forms.length;
+    const template = forms[0].cloneNode(true);
+
+    // Clear values in the cloned form
+    template.querySelectorAll('input, textarea, select').forEach(el => {
+      if (el.type === 'checkbox') el.checked = false;
+      else if (el.type !== 'hidden' || !el.name.includes('-id')) el.value = '';
+      if (el.name.includes('-id')) el.value = '';
+    });
+
+    // Update indices
+    template.innerHTML = template.innerHTML
+      .replace(/team-\d+-/g, `team-${idx}-`)
+      .replace(/id_team-\d+-/g, `id_team-${idx}-`);
+
+    // Remove existing photo preview img if any
+    template.querySelectorAll('img').forEach(img => img.remove());
+
+    container.appendChild(template);
+    totalInput.value = parseInt(totalInput.value) + 1;
+  });
+})();
+</script>
+{% endblock %}

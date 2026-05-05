@@ -13,6 +13,8 @@ from django.utils.html import mark_safe
 from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils import timezone
+from django import forms
+from django.forms import modelformset_factory
 
 from adminsortable2.admin import SortableAdminMixin
 
@@ -36,6 +38,80 @@ from .models import (
 
 from django.contrib.admin import AdminSite
 
+
+# =====================================================
+# ABOUT US — COMBINED FORMS
+# =====================================================
+class MissionVisionForm(forms.ModelForm):
+    class Meta:
+        model = MissionVision
+        fields = ['hero_image', 'hero_title', 'hero_subtitle', 'vision_and_purpose', 'statement_of_faith']
+        widgets = {
+            'hero_title': forms.TextInput(attrs={'style': 'width:100%'}),
+            'hero_subtitle': forms.TextInput(attrs={'style': 'width:100%'}),
+            'vision_and_purpose': forms.Textarea(attrs={'rows': 6}),
+            'statement_of_faith': forms.Textarea(attrs={'rows': 6}),
+        }
+
+class WhoWeAreForm(forms.ModelForm):
+    class Meta:
+        model = WhoWeAre
+        fields = ['title', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={'style': 'width:100%'}),
+            'content': forms.Textarea(attrs={'rows': 8}),
+        }
+
+TeamMemberFormSet = modelformset_factory(
+    TeamMember,
+    fields=['name', 'role', 'photo', 'facebook', 'twitter', 'linkedin', 'order', 'is_active'],
+    extra=1,
+    can_delete=True,
+    widgets={
+        'name': forms.TextInput(attrs={'style': 'width:100%'}),
+        'role': forms.TextInput(attrs={'style': 'width:100%'}),
+        'facebook': forms.URLInput(attrs={'style': 'width:100%'}),
+        'twitter': forms.URLInput(attrs={'style': 'width:100%'}),
+        'linkedin': forms.URLInput(attrs={'style': 'width:100%'}),
+        'order': forms.NumberInput(attrs={'style': 'width:80px'}),
+    }
+)
+
+
+def about_us_admin_view(request):
+    mv  = MissionVision.objects.first()
+    who = WhoWeAre.objects.first()
+
+    if request.method == 'POST':
+        mv_form      = MissionVisionForm(request.POST, request.FILES, instance=mv,  prefix='mv')
+        who_form     = WhoWeAreForm(request.POST, instance=who, prefix='who')
+        team_formset = TeamMemberFormSet(request.POST, request.FILES,
+                                         queryset=TeamMember.objects.all(), prefix='team')
+
+        if mv_form.is_valid() and who_form.is_valid() and team_formset.is_valid():
+            mv_form.save()
+            who_form.save()
+            team_formset.save()
+            messages.success(request, 'About Us page saved successfully.')
+            return redirect(request.path)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        mv_form      = MissionVisionForm(instance=mv,  prefix='mv')
+        who_form     = WhoWeAreForm(instance=who, prefix='who')
+        team_formset = TeamMemberFormSet(queryset=TeamMember.objects.all(), prefix='team')
+
+    return render(request, 'admin/about_us_combined.html', {
+        'mv_form':      mv_form,
+        'who_form':     who_form,
+        'team_formset': team_formset,
+        'title':        'About Us Page',
+        'site_header':  admin.site.site_header,
+        'has_permission': True,
+        'opts': type('opts', (), {'app_label': 'core', 'verbose_name': 'About Us'})(),
+    })
+
+
 # =====================================================
 # CUSTOM ADMIN SITE — grouping + branding
 # =====================================================
@@ -44,37 +120,37 @@ class TorchbearersAdminSite(AdminSite):
     site_title = "Torchbearers Admin Portal"
     index_title = "Welcome to Torchbearers Missions Dashboard"
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('about-us/', self.admin_view(about_us_admin_view), name='about_us_page'),
+        ]
+        return custom_urls + urls
+
     def get_app_list(self, request, app_label=None):
         app_list = super().get_app_list(request, app_label)
 
-        about_us_model_names = {'MissionVision', 'WhoWeAre', 'TeamMember'}
-        excluded_model_names = {'Article'}
-        about_us_order = {'MissionVision': 0, 'WhoWeAre': 1, 'TeamMember': 2}
-
-        about_us_entries = []
+        hidden_model_names = {'MissionVision', 'WhoWeAre', 'TeamMember', 'Article'}
 
         for app in app_list:
-            remaining = []
-            for model in app['models']:
-                name = model['object_name']
-                if name in about_us_model_names:
-                    about_us_entries.append(model)
-                elif name not in excluded_model_names:
-                    remaining.append(model)
-            app['models'] = remaining
+            app['models'] = [m for m in app['models'] if m['object_name'] not in hidden_model_names]
 
-        # Drop now-empty app groups
         app_list = [a for a in app_list if a['models']]
 
-        if about_us_entries:
-            about_us_entries.sort(key=lambda m: about_us_order.get(m['object_name'], 99))
-            app_list.insert(0, {
-                'name': 'About Us',
-                'app_label': 'about_us',
-                'app_url': '#',
-                'has_module_perms': True,
-                'models': about_us_entries,
-            })
+        # Single "About Us Page" entry at the top
+        app_list.insert(0, {
+            'name': 'About Us',
+            'app_label': 'about_us',
+            'app_url': '/admin/about-us/',
+            'has_module_perms': True,
+            'models': [{
+                'name': 'About Us Page',
+                'object_name': 'AboutUsPage',
+                'admin_url': '/admin/about-us/',
+                'add_url': None,
+                'view_only': False,
+            }],
+        })
 
         return app_list
 
@@ -84,23 +160,6 @@ admin.site.__class__ = TorchbearersAdminSite
 admin.site.site_header = "Torchbearers Missions Admin"
 admin.site.site_title  = "Torchbearers Admin Portal"
 admin.site.index_title = "Welcome to Torchbearers Missions Dashboard"
-
-
-# =====================================================
-# MISSION & VISION
-# =====================================================
-@admin.register(MissionVision)
-class MissionVisionAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "updated_at")
-    fields = ("hero_image", "hero_title", "hero_subtitle", "vision_and_purpose", "statement_of_faith")
-
-
-# =====================================================
-# WHO WE ARE
-# =====================================================
-@admin.register(WhoWeAre)
-class WhoWeAreAdmin(admin.ModelAdmin):
-    list_display = ("title", "updated_at")
 
 
 # =====================================================
