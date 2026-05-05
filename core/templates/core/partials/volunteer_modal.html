@@ -28,10 +28,12 @@
           <textarea name="message" class="form-control mb-3"
                     rows="3" placeholder="Message"></textarea>
 
-          <!-- ✅ Cloudflare Turnstile -->
+          {% if CLOUDFLARE_TURNSTILE_SITE_KEY %}
+          <!-- Cloudflare Turnstile -->
           <div class="cf-turnstile"
                data-sitekey="{{ CLOUDFLARE_TURNSTILE_SITE_KEY }}">
           </div>
+          {% endif %}
         </div>
 
         <div class="modal-footer">
@@ -45,5 +47,7 @@
   </div>
 </div>
 
+{% if CLOUDFLARE_TURNSTILE_SITE_KEY %}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 

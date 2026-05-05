@@ -106,8 +106,8 @@
       {% for post in blogs %}
       <div class="col-md-4">
         <div class="card h-100 shadow-sm">
-          {% if post.image %}
-          <img src="{{ post.image.url }}"
+          {% if post.feature_image %}
+          <img src="{{ post.feature_image.url }}"
                class="card-img-top"
                alt="{{ post.title }}">
           {% endif %}

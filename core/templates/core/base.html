@@ -82,7 +82,7 @@
 
 {% block scripts %}{% endblock %}
 
-<script src="https://checkout.flutterwave.com/v3.js"></script>
+{% if FLUTTERWAVE_PUBLIC_KEY %}<script src="https://checkout.flutterwave.com/v3.js"></script>{% endif %}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -119,6 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const slides = document.querySelectorAll(".hero-slide");
+    if (!slides.length) return;
 
     const images = [
         "{% static 'core/images/hero-1.jpg' %}",
@@ -127,7 +128,9 @@ document.addEventListener("DOMContentLoaded", function () {
     ];
 
     slides.forEach((slide, index) => {
-        slide.style.backgroundImage = `url('${images[index]}')`;
+        if (images[index]) {
+            slide.style.backgroundImage = `url('${images[index]}')`;
+        }
     });
 
     let current = 0;
