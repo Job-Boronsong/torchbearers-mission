@@ -25,7 +25,7 @@
     <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
       Hero Section
     </h2>
-    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+    <div style="padding:1.2rem 1.5rem;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
 
       <!-- Hero Image -->
       <div class="form-row" style="margin-bottom:1.2rem;">
@@ -33,13 +33,13 @@
         {% if mv_form.instance.hero_image %}
           <div style="margin-bottom:.5rem;">
             <img src="{{ mv_form.instance.hero_image.url }}" style="max-height:120px;border-radius:6px;border:1px solid #ddd;" alt="Current hero image">
-            <label style="display:inline-flex;align-items:center;gap:.4rem;margin-left:1rem;font-size:.875rem;color:#555;">
+            <label style="display:inline-flex;align-items:center;gap:.4rem;margin-left:1rem;font-size:.875rem;">
               <input type="checkbox" name="{{ mv_form.hero_image.html_name }}-clear"> Clear image
             </label>
           </div>
         {% endif %}
         {{ mv_form.hero_image }}
-        <p class="help" style="color:#666;font-size:.8rem;margin-top:.3rem;">{{ mv_form.hero_image.help_text }}</p>
+        <p class="help" style="font-size:.8rem;margin-top:.3rem;">{{ mv_form.hero_image.help_text }}</p>
       </div>
 
       <!-- Hero Title -->
@@ -65,7 +65,7 @@
     <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
       Who We Are
     </h2>
-    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+    <div style="padding:1.2rem 1.5rem;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
 
       <!-- Section Title -->
       <div class="form-row" style="margin-bottom:1.2rem;">
@@ -90,7 +90,7 @@
     <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
       Mission &amp; Vision
     </h2>
-    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+    <div style="padding:1.2rem 1.5rem;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
 
       <div class="form-row" style="margin-bottom:1.2rem;">
         <label style="display:block;font-weight:600;margin-bottom:.4rem;">Vision &amp; Purpose</label>
@@ -113,11 +113,11 @@
     <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
       Team Members
     </h2>
-    <div style="padding:1.2rem 1.5rem;background:#fff;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+    <div style="padding:1.2rem 1.5rem;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
 
       <div id="team-members-container">
         {% for form in team_formset %}
-          <div class="team-member-row" style="border:1px solid #e0e0e0;border-radius:6px;padding:1.2rem;margin-bottom:1rem;background:#fafafa;position:relative;">
+          <div class="team-member-row" style="border:1px solid #ddd;border-radius:6px;padding:1.2rem;margin-bottom:1rem;position:relative;">
             {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
