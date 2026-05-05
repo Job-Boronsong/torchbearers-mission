@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;700&display=swap');
 
 :root {
   /* Brand palette derived from the Torchbearers logo */
@@ -19,8 +19,8 @@
   --border-color: #d0dbe8;
   --border-focus: #1c5fa5;
 
-  --font-heading: 'Fraunces', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Lato', sans-serif;
 
   --shadow-sm: 0 2px 4px rgba(43, 43, 43, 0.05);
   --shadow-md: 0 4px 12px rgba(43, 43, 43, 0.08);
