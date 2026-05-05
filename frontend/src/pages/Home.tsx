@@ -4,8 +4,10 @@ import { ArrowRight, Heart, Users, Globe, ChevronLeft, ChevronRight } from 'luci
 import { getHome, subscribeNewsletter } from '../api';
 import type { HomeData } from '../api';
 import { format } from 'date-fns';
+import { useDonate } from '../context/DonateModalContext';
 
 export default function Home() {
+  const { openDonate } = useDonate();
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -215,9 +217,9 @@ export default function Home() {
             Whether through your time, your resources, or your prayers, your partnership enables us to reach further and impact more lives with the Gospel and humanitarian aid.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/donate" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+            <button onClick={openDonate} className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem', cursor: 'pointer' }}>
               <Heart size={20} /> Donate Now
-            </Link>
+            </button>
             <Link to="/volunteer" className="btn btn-outline" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
               <Users size={20} /> Become a Volunteer
             </Link>

@@ -3,10 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Mail, Phone, MapPin, Heart } from 'lucide-react';
 import { getFooter } from '../api';
 import type { FooterContent } from '../api';
+import { useDonate } from '../context/DonateModalContext';
 
 const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { openDonate } = useDonate();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -76,9 +78,9 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
               </li>
             ))}
             <li>
-              <Link to="/donate" className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={openDonate} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', cursor: 'pointer' }}>
                 <Heart size={18} /> Donate
-              </Link>
+              </button>
             </li>
           </ul>
         </nav>
@@ -113,9 +115,9 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
               </li>
             ))}
             <li>
-              <Link to="/donate" className="btn btn-primary" style={{ display: 'flex', width: '100%', gap: '0.5rem' }}>
+              <button onClick={openDonate} className="btn btn-primary" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
                 <Heart size={18} /> Donate
-              </Link>
+              </button>
             </li>
           </ul>
         </div>

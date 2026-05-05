@@ -4,8 +4,10 @@ import { Heart, ArrowLeft, Globe } from 'lucide-react';
 import { getProject } from '../api';
 import type { Project } from '../api';
 import { format } from 'date-fns';
+import { useDonate } from '../context/DonateModalContext';
 
 export default function ProjectDetail() {
+  const { openDonate } = useDonate();
   const { slug } = useParams<{ slug: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,9 +92,9 @@ export default function ProjectDetail() {
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
                       Your generous donation helps us fund and sustain this initiative.
                     </p>
-                    <Link to="/donate" className="btn btn-primary" style={{ width: '100%' }}>
+                    <button onClick={openDonate} className="btn btn-primary" style={{ width: '100%', cursor: 'pointer' }}>
                       <Heart size={18} /> Donate Now
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
