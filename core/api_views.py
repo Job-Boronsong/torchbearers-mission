@@ -42,7 +42,6 @@ def api_home(request):
             "id": p.id,
             "title": p.title,
             "slug": p.slug,
-            "excerpt": p.excerpt,
             "feature_image": _image_url(request, p.feature_image),
         }
         for p in Project.objects.filter(is_active=True).order_by("-created_at")[:3]
@@ -82,7 +81,6 @@ def api_project_list(request):
             "id": p.id,
             "title": p.title,
             "slug": p.slug,
-            "excerpt": p.excerpt,
             "feature_image": _image_url(request, p.feature_image),
             "created_at": p.created_at.isoformat(),
             "show_donate": p.show_donate,
@@ -104,7 +102,6 @@ def api_project_detail(request, slug):
         "title": p.title,
         "slug": p.slug,
         "description": p.description,
-        "excerpt": p.excerpt,
         "feature_image": _image_url(request, p.feature_image),
         "created_at": p.created_at.isoformat(),
         "show_donate": p.show_donate,

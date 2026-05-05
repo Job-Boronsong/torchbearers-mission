@@ -192,7 +192,6 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ("is_active", "created_at")
     search_fields = ("title",)
     prepopulated_fields = {"slug": ("title",)}
-    exclude = ("excerpt",)
 
 
 # =====================================================

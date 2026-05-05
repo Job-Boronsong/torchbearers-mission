@@ -37,7 +37,6 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
     description = CKEditor5Field("Description", config_name="default")
-    excerpt = models.TextField(blank=True, help_text="Short summary shown on project listings (auto-generated if empty).")
     feature_image = models.ImageField(upload_to='projects/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     show_donate = models.BooleanField(default=True)
@@ -45,9 +44,6 @@ class Project(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        if not self.excerpt and self.description:
-            plain_text = strip_tags(self.description)
-            self.excerpt = " ".join(plain_text.split()[:30])
         super().save(*args, **kwargs)
 
     def __str__(self):

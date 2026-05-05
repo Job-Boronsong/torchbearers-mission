@@ -19,7 +19,6 @@ export interface Project {
   id: number;
   title: string;
   slug: string;
-  excerpt: string;
   description: string;
   feature_image: string | null;
   created_at: string;

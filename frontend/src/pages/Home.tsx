@@ -197,7 +197,7 @@ export default function Home() {
                   )}
                   <div className="card-content">
                     <h3 className="h4 card-title">{project.title}</h3>
-                    <p className="card-text">{project.excerpt || 'Read more about this project and how you can support it.'}</p>
+                    <p className="card-text">Read more about this project and how you can support it.</p>
                     <div style={{ color: 'var(--brand-primary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto' }}>
                       Learn More <ArrowRight size={16} />
                     </div>

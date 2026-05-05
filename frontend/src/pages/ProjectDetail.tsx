@@ -56,9 +56,6 @@ export default function ProjectDetail() {
           
           <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center', paddingBottom: '4rem' }}>
             <h1 className="h1" style={{ marginBottom: '1.5rem' }}>{project.title}</h1>
-            {project.excerpt && (
-              <p className="h4" style={{ color: 'var(--text-muted)', fontWeight: 400 }}>{project.excerpt}</p>
-            )}
           </div>
         </div>
       </section>
