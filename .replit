@@ -41,3 +41,13 @@ externalPort = 8000
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "start.sh"]
+
+[userenv]
+
+[userenv.shared]
+EMAIL_HOST = "smtp.zoho.com"
+EMAIL_PORT = "465"
+EMAIL_USE_TLS = "False"
+EMAIL_USE_SSL = "True"
+EMAIL_HOST_USER = "info@torchbearersmission.org"
+DEFAULT_FROM_EMAIL = "Torchbearers Mission <info@torchbearersmission.org>"
