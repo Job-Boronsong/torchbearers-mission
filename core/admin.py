@@ -21,6 +21,7 @@ from .models import (
     Project,
     BlogPost,
     Volunteer,
+    Donation,
     ContactMessage,
     Newsletter,
     NewsletterSubscriber,
@@ -28,6 +29,7 @@ from .models import (
     FooterContent,
     TeamMember,
     WhoWeAre,
+    Article,
     CarouselSlide,
     LoginAudit,
 )
@@ -58,6 +60,43 @@ torchbearers_admin_site = TorchbearersAdminSite(name="torchbearers_admin")
 admin.site.site_header = "Torchbearers Missions Admin"
 admin.site.site_title = "Torchbearers Admin Portal"
 admin.site.index_title = "Welcome to Torchbearers Missions Dashboard"
+
+
+# =====================================================
+# MISSION & VISION
+# =====================================================
+@admin.register(MissionVision)
+class MissionVisionAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "updated_at")
+
+
+# =====================================================
+# WHO WE ARE
+# =====================================================
+@admin.register(WhoWeAre)
+class WhoWeAreAdmin(admin.ModelAdmin):
+    list_display = ("title", "updated_at")
+
+
+# =====================================================
+# DONATIONS
+# =====================================================
+@admin.register(Donation)
+class DonationAdmin(admin.ModelAdmin):
+    list_display = ("donor_name", "email", "amount", "payment_method", "is_verified", "created_at")
+    list_filter = ("payment_method", "is_verified", "created_at")
+    search_fields = ("donor_name", "email", "transaction_id")
+    readonly_fields = ("transaction_id", "created_at")
+
+
+# =====================================================
+# ARTICLES
+# =====================================================
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ("title", "category", "author", "created_at")
+    list_filter = ("category", "created_at")
+    search_fields = ("title", "author")
 
 
 # =====================================================
@@ -239,9 +278,9 @@ class NewsletterAdmin(admin.ModelAdmin):
                 "week_number": obj.week_number,
                 "year": timezone.now().year,
                 "unsubscribe_url": "#",
-		"first_name": "Subscriber",
+                "first_name": "Subscriber",
 
-		"unsubscribe_url": "#",
+                "unsubscribe_url": "#",
             }
         )
 
@@ -318,11 +357,11 @@ class NewsletterAdmin(admin.ModelAdmin):
                         "week_number": newsletter.week_number,
                         "year": timezone.now().year,
                         "unsubscribe_url": unsubscribe_url,
-			"first_name": sub.first_name,
-			"week_number": newsletter.week_number,
-			"year": timezone.now().year,
+                        "first_name": sub.first_name,
+                        "week_number": newsletter.week_number,
+                        "year": timezone.now().year,
 
-			"unsubscribe_url": unsubscribe_url,
+                        "unsubscribe_url": unsubscribe_url,
                     }
                 ) + f'<img src="{open_pixel}" width="1" height="1" style="display:none;">'
 
