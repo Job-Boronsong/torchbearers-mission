@@ -31,6 +31,24 @@ class MissionVision(models.Model):
 
 
 # =========================
+# Director's Message
+# =========================
+class DirectorMessage(models.Model):
+    name = models.CharField(max_length=100, default="Director")
+    title = models.CharField(max_length=100, default="Executive Director")
+    photo = models.ImageField(upload_to='director/', blank=True, null=True)
+    message = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Director's Message"
+        verbose_name_plural = "Director's Message"
+
+    def __str__(self):
+        return f"Message from {self.name}"
+
+
+# =========================
 # Projects
 # =========================
 class Project(models.Model):
