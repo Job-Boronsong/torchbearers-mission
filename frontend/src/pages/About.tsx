@@ -110,8 +110,8 @@ export default function About() {
                       </div>
                     )}
                   </div>
-                  <h3 className="h4" style={{ marginBottom: '0.5rem' }}>{member.name}</h3>
-                  <p style={{ color: 'var(--brand-primary)', fontWeight: 500, fontSize: '0.875rem' }}>{member.role}</p>
+                  <h3 style={{ marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 700 }}>{member.name}</h3>
+                  <p style={{ color: 'var(--brand-primary)', fontWeight: 500, fontSize: '0.78rem' }}>{member.role}</p>
                 </div>
               ))}
             </div>
