@@ -312,6 +312,8 @@ def api_newsletter_subscribe(request):
         defaults={"first_name": first_name, "is_active": True},
     )
     if not created:
+        if subscriber.is_active:
+            return JsonResponse({"already_subscribed": True, "message": "This email is already subscribed."}, status=409)
         subscriber.is_active = True
         if first_name:
             subscriber.first_name = first_name
