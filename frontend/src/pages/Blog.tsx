@@ -56,14 +56,8 @@ export default function Blog() {
                     <div className="card-img" style={{ height: '220px', backgroundColor: 'var(--border-color)' }} />
                   )}
                   <div className="card-content">
-                    <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <span>{format(new Date(post.created_at), 'MMM d, yyyy')}</span>
-                      {post.author && (
-                        <>
-                          <span>•</span>
-                          <span>{post.author}</span>
-                        </>
-                      )}
+                    <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
+                      {format(new Date(post.created_at), 'MMM d, yyyy')}
                     </div>
                     <h3 className="h4 card-title">{post.title}</h3>
                     <p className="card-text">{post.seo_description || 'Read full article...'}</p>

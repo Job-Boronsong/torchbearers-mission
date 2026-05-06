@@ -194,19 +194,18 @@ class ProjectAdmin(admin.ModelAdmin):
 class BlogPostAdmin(admin.ModelAdmin):
     list_display = (
         "title",
-        "author",
         "is_published",
         "created_at",
         "feature_image_preview",
     )
-    list_filter = ("is_published", "created_at", "author")
+    list_filter = ("is_published", "created_at")
     search_fields = ("title", "content")
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ("feature_image_preview",)
 
     fieldsets = (
         ("Content", {
-            "fields": ("title", "slug", "author", "content", "feature_image")
+            "fields": ("title", "slug", "content", "feature_image")
         }),
         ("SEO", {
             "fields": ("seo_title", "seo_description"),
@@ -215,11 +214,6 @@ class BlogPostAdmin(admin.ModelAdmin):
             "fields": ("is_published",),
         }),
     )
-
-    def save_model(self, request, obj, form, change):
-        if not obj.author:
-            obj.author = request.user
-        super().save_model(request, obj, form, change)
 
     def feature_image_preview(self, obj):
         if obj.feature_image:

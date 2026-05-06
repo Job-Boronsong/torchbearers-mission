@@ -76,13 +76,6 @@ class BlogPost(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     content = RichTextUploadingField()
     feature_image = models.ImageField(upload_to='blog/', blank=True, null=True)
-    author = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="blog_posts"
-    )
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     seo_title = models.CharField(max_length=60, blank=True, help_text="Recommend: 50-60 characters")

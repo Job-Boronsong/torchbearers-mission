@@ -119,7 +119,6 @@ def api_blog_list(request):
             "feature_image": _image_url(request, b.feature_image),
             "seo_description": b.seo_description,
             "created_at": b.created_at.isoformat(),
-            "author": b.author.get_full_name() if b.author else None,
         }
         for b in BlogPost.objects.filter(is_published=True).order_by("-created_at")
     ]
@@ -142,7 +141,6 @@ def api_blog_detail(request, slug):
         "seo_title": b.seo_title,
         "seo_description": b.seo_description,
         "created_at": b.created_at.isoformat(),
-        "author": b.author.get_full_name() if b.author else None,
     })
 
 

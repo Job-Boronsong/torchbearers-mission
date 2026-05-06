@@ -33,7 +33,6 @@ export interface BlogPost {
   seo_description: string;
   content: string;
   created_at: string;
-  author: string | null;
 }
 
 export interface TeamMember {
