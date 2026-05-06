@@ -84,12 +84,6 @@ export interface AboutData {
     title: string;
     content: string;
   };
-  director_message: {
-    name: string;
-    role: string;
-    photo: string | null;
-    message: string;
-  } | null;
   team: TeamMember[];
 }
 

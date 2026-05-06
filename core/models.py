@@ -24,16 +24,6 @@ class MissionVision(models.Model):
     hero_subtitle = models.CharField(max_length=400, blank=True, default="A community dedicated to shining light in dark places.", help_text="Subtitle shown below the heading")
     vision_and_purpose = models.TextField()
     statement_of_faith = models.TextField()
-    director = models.ForeignKey(
-        'TeamMember',
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name='+',
-        verbose_name="Director (for message section)",
-        help_text="Select the team member whose message will be featured",
-    )
-    director_message = models.TextField(blank=True, verbose_name="Director's Message")
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

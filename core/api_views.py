@@ -165,16 +165,6 @@ def api_about(request):
         for m in TeamMember.objects.filter(is_active=True).order_by("order")
     ]
 
-    director = None
-    if mv and mv.director:
-        d = mv.director
-        director = {
-            "name": d.name,
-            "role": d.role,
-            "photo": _image_url(request, d.photo),
-            "message": mv.director_message,
-        }
-
     return JsonResponse({
         "mission_vision": {
             "hero_image": _image_url(request, mv.hero_image) if mv else None,
@@ -187,7 +177,6 @@ def api_about(request):
             "title": who.title if who else "Who We Are",
             "content": who.content if who else "",
         },
-        "director_message": director,
         "team": team,
     })
 
