@@ -124,29 +124,29 @@ export default function Home() {
 
       {/* Stats Section */}
       {data && (
-        <section style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--text-light)', padding: '4rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <section style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--text-light)', padding: '2rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <div className="container">
             <div className="grid-3 text-center">
               <div>
-                <Heart size={48} style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '0.5rem' }}>
+                <Heart size={32} style={{ margin: '0 auto 0.5rem', opacity: 0.8 }} />
+                <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '0.25rem' }}>
                   ₵{data.total_donations}
                 </div>
-                <div style={{ fontSize: '1.125rem', opacity: 0.9 }}>Total Donations</div>
+                <div style={{ fontSize: '1rem', opacity: 0.9 }}>Total Donations</div>
               </div>
               <div>
-                <Users size={48} style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '0.5rem' }}>
+                <Users size={32} style={{ margin: '0 auto 0.5rem', opacity: 0.8 }} />
+                <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '0.25rem' }}>
                   {data.donor_count}
                 </div>
-                <div style={{ fontSize: '1.125rem', opacity: 0.9 }}>Generous Donors</div>
+                <div style={{ fontSize: '1rem', opacity: 0.9 }}>Generous Donors</div>
               </div>
               <div>
-                <Globe size={48} style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '0.5rem' }}>
+                <Globe size={32} style={{ margin: '0 auto 0.5rem', opacity: 0.8 }} />
+                <div style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-heading)', marginBottom: '0.25rem' }}>
                   {data.featured_projects?.length || 0}+
                 </div>
-                <div style={{ fontSize: '1.125rem', opacity: 0.9 }}>Active Projects</div>
+                <div style={{ fontSize: '1rem', opacity: 0.9 }}>Active Projects</div>
               </div>
             </div>
           </div>
