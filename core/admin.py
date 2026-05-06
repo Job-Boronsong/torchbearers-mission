@@ -45,12 +45,13 @@ from django.contrib.admin import AdminSite
 class MissionVisionForm(forms.ModelForm):
     class Meta:
         model = MissionVision
-        fields = ['hero_image', 'hero_title', 'hero_subtitle', 'vision_and_purpose', 'statement_of_faith']
+        fields = ['hero_image', 'hero_title', 'hero_subtitle', 'vision_and_purpose', 'statement_of_faith', 'director', 'director_message']
         widgets = {
             'hero_title': forms.TextInput(attrs={'style': 'width:100%'}),
             'hero_subtitle': forms.TextInput(attrs={'style': 'width:100%'}),
             'vision_and_purpose': forms.Textarea(attrs={'rows': 6}),
             'statement_of_faith': forms.Textarea(attrs={'rows': 6}),
+            'director_message': forms.Textarea(attrs={'rows': 8, 'style': 'width:100%'}),
         }
 
 class WhoWeAreForm(forms.ModelForm):

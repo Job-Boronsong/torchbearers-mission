@@ -75,6 +75,54 @@ export default function About() {
         </section>
       )}
 
+      {/* Director's Message */}
+      {data?.director_message && data.director_message.message && (
+        <section className="section" style={{ backgroundColor: 'var(--bg-subtle)' }}>
+          <div className="container" style={{ maxWidth: '860px' }}>
+            <h2 className="h2 text-center" style={{ marginBottom: '3rem' }}>Message from the Director</h2>
+            <div style={{
+              display: 'flex',
+              gap: '2.5rem',
+              alignItems: 'flex-start',
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-sm)',
+              padding: '2.5rem',
+              borderLeft: '5px solid var(--brand-gold, #c9a84c)',
+            }}>
+              <div style={{ flexShrink: 0, textAlign: 'center' }}>
+                <div style={{
+                  width: '110px',
+                  height: '110px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--border-color)',
+                  margin: '0 auto 0.75rem',
+                }}>
+                  {data.director_message.photo ? (
+                    <img
+                      src={data.director_message.photo}
+                      alt={data.director_message.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-muted)' }}>
+                      {data.director_message.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <p style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0 }}>{data.director_message.name}</p>
+                <p style={{ fontSize: '0.78rem', color: 'var(--brand-primary)', margin: '0.2rem 0 0' }}>{data.director_message.role}</p>
+              </div>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: '4rem', lineHeight: 1, color: 'var(--brand-gold, #c9a84c)', display: 'block', marginBottom: '-1rem', fontFamily: 'Georgia, serif' }}>&ldquo;</span>
+                <div className="rich-text text-muted" style={{ whiteSpace: 'pre-line' }} dangerouslySetInnerHTML={{ __html: data.director_message.message }} />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Mission & Vision */}
       {data?.mission_vision && (
         <section className="section" style={{ backgroundColor: 'var(--bg-subtle)' }}>
