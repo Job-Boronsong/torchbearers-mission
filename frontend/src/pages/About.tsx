@@ -34,7 +34,7 @@ export default function About() {
         color: 'var(--text-light)',
         padding: '9rem 0',
         textAlign: 'center',
-        backgroundColor: 'var(--brand-primary)',
+        backgroundColor: '#111',
         overflow: 'hidden',
       }}>
         {data?.mission_vision?.hero_image && (
@@ -48,11 +48,11 @@ export default function About() {
               height: '100%',
               objectFit: 'cover',
               objectPosition: 'center',
-              opacity: 0.35,
               pointerEvents: 'none',
             }}
           />
         )}
+        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)' }} />
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <h1 className="h1" style={{ color: 'var(--text-light)', marginBottom: '1rem' }}>
             {data?.mission_vision?.hero_title || 'About Us'}
