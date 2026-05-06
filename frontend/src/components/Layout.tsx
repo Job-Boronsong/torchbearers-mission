@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Mail, Phone, MapPin, Heart } from 'lucide-react';
+import { Menu, X, Mail, Phone, MapPin, Heart, Users } from 'lucide-react';
 import { getFooter, subscribeNewsletter } from '../api';
 import type { FooterContent } from '../api';
 import { useDonate } from '../context/DonateModalContext';
@@ -27,13 +27,6 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
 
   return (
     <header className="navbar-wrapper" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
-      {/* Top Bar */}
-      <div style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--text-light)', padding: '0.5rem 0', fontSize: '0.875rem' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <button onClick={openVolunteer} style={{ background: 'none', border: 'none', color: 'inherit', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>Volunteer With Us</button>
-        </div>
-      </div>
-
       {/* Main Nav */}
       <div className="container" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)' }}>
@@ -65,6 +58,11 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
                 </Link>
               </li>
             ))}
+            <li>
+              <button onClick={openVolunteer} className="btn btn-outline" style={{ display: 'flex', gap: '0.5rem', cursor: 'pointer' }}>
+                <Users size={18} /> Volunteer
+              </button>
+            </li>
             <li>
               <button onClick={openDonate} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem', cursor: 'pointer' }}>
                 <Heart size={18} /> Donate
@@ -102,6 +100,11 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
                 </Link>
               </li>
             ))}
+            <li>
+              <button onClick={openVolunteer} className="btn btn-outline" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
+                <Users size={18} /> Volunteer With Us
+              </button>
+            </li>
             <li>
               <button onClick={openDonate} className="btn btn-primary" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
                 <Heart size={18} /> Donate
