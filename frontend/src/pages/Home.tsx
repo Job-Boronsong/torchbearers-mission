@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Heart, Users, Globe, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getHome, subscribeNewsletter } from '../api';
+import { getHome } from '../api';
 import type { HomeData } from '../api';
 import { format } from 'date-fns';
 import { useDonate } from '../context/DonateModalContext';
@@ -13,10 +13,6 @@ export default function Home() {
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [nlStatus, setNlStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
 
   useEffect(() => {
     getHome()
@@ -38,22 +34,6 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [data?.slides]);
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setNlStatus(null);
-    try {
-      const res = await subscribeNewsletter({ email, first_name: firstName });
-      if (res.error) {
-        setNlStatus({ type: 'error', msg: res.error });
-      } else {
-        setNlStatus({ type: 'success', msg: res.message || 'Subscribed successfully!' });
-        setEmail('');
-        setFirstName('');
-      }
-    } catch (err: any) {
-      setNlStatus({ type: 'error', msg: err.response?.data?.error || 'An error occurred. Please try again.' });
-    }
-  };
 
   if (loading) {
     return (
@@ -267,46 +247,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Newsletter */}
-      <section style={{ backgroundColor: 'var(--brand-primary)', padding: '5rem 0' }}>
-        <div className="container" style={{ maxWidth: '600px', textAlign: 'center' }}>
-          <h2 className="h2" style={{ color: '#ffffff', marginBottom: '1rem' }}>Stay Connected</h2>
-          <p style={{ color: 'rgba(255,255,255,0.88)', marginBottom: '2rem' }}>
-            Subscribe to our newsletter for updates, prayer points, and stories of transformation.
-          </p>
-          
-          {nlStatus && (
-            <div className={`alert ${nlStatus.type === 'error' ? 'alert-error' : 'alert-success'}`}>
-              {nlStatus.msg}
-            </div>
-          )}
-
-          <form onSubmit={handleSubscribe} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <input 
-                type="text" 
-                className="form-input" 
-                placeholder="First Name (optional)" 
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                style={{ flex: '1 1 200px' }}
-              />
-              <input 
-                type="email" 
-                className="form-input" 
-                placeholder="Email Address *" 
-                required 
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                style={{ flex: '2 1 300px' }}
-              />
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }}>
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </section>
     </div>
   );
 }
