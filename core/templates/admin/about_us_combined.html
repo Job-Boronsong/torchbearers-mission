@@ -107,7 +107,32 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════
-       SECTION 4 — TEAM MEMBERS
+       SECTION 4 — DIRECTOR'S MESSAGE
+  ═══════════════════════════════════════════════ -->
+  <div class="module" style="margin-bottom:2rem;">
+    <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
+      Director's Message
+    </h2>
+    <div style="padding:1.2rem 1.5rem;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
+
+      <div class="form-row" style="margin-bottom:1.2rem;">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Director (select from team members)</label>
+        {{ mv_form.director }}
+        <p class="help" style="font-size:.8rem;margin-top:.3rem;">{{ mv_form.director.help_text }}</p>
+        {% if mv_form.director.errors %}<p style="color:red;">{{ mv_form.director.errors }}</p>{% endif %}
+      </div>
+
+      <div class="form-row">
+        <label style="display:block;font-weight:600;margin-bottom:.4rem;">Message</label>
+        {{ mv_form.director_message }}
+        <p class="help" style="font-size:.8rem;margin-top:.3rem;">This message will appear on the About Us page between "Who We Are" and "Vision &amp; Purpose".</p>
+        {% if mv_form.director_message.errors %}<p style="color:red;">{{ mv_form.director_message.errors }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SECTION 5 — TEAM MEMBERS
   ═══════════════════════════════════════════════ -->
   <div class="module" style="margin-bottom:2rem;">
     <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
