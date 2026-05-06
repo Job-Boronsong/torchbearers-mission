@@ -1,4 +1,5 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Mail, Phone, MapPin, Heart, Users } from 'lucide-react';
 import { getFooter, subscribeNewsletter } from '../api';
@@ -6,7 +7,7 @@ import type { FooterContent } from '../api';
 import { useDonate } from '../context/DonateModalContext';
 import { useVolunteer } from '../context/VolunteerModalContext';
 
-const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
+const Navbar = (_: { footerData: FooterContent | null }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { openDonate } = useDonate();

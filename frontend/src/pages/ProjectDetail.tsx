@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Heart, ArrowLeft, Globe } from 'lucide-react';
+import { Heart, ArrowLeft } from 'lucide-react';
 import { getProject } from '../api';
 import type { Project } from '../api';
 import { format } from 'date-fns';
