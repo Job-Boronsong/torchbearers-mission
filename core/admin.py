@@ -100,6 +100,19 @@ class TorchbearersAdminSite(AdminSite):
     site_title = "Torchbearers Admin Portal"
     index_title = "Welcome to Torchbearers Missions Dashboard"
 
+    def index(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['stats'] = {
+            'blog_posts':             BlogPost.objects.count(),
+            'projects':               Project.objects.filter(is_active=True).count(),
+            'team_members':           TeamMember.objects.filter(is_active=True).count(),
+            'volunteers':             Volunteer.objects.count(),
+            'donations':              Donation.objects.count(),
+            'contact_messages':       ContactMessage.objects.filter(is_read=False).count(),
+            'newsletter_subscribers': NewsletterSubscriber.objects.filter(is_active=True).count(),
+        }
+        return super().index(request, extra_context)
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [

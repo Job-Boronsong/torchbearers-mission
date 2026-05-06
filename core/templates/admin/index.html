@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content_title %}<h1>Dashboard</h1>{% endblock %}
+
+{% block content %}
+<p style="color:#6c757d;margin-bottom:2rem;">Welcome back. Here's an overview of your content.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:2.5rem;">
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Blog Posts</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.blog_posts }}</div>
+    <a href="{% url 'admin:core_blogpost_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">Manage &rarr;</a>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Active Projects</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.projects }}</div>
+    <a href="{% url 'admin:core_project_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">Manage &rarr;</a>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Team Members</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.team_members }}</div>
+    <a href="{% url 'admin:core_teammember_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">Manage &rarr;</a>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Volunteers</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.volunteers }}</div>
+    <a href="{% url 'admin:core_volunteer_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">View &rarr;</a>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Donations</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.donations }}</div>
+    <a href="{% url 'admin:core_donation_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">View &rarr;</a>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Unread Messages</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.contact_messages }}</div>
+    <a href="{% url 'admin:core_contactmessage_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">View &rarr;</a>
+  </div>
+
+  <div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.25rem 1.5rem;">
+    <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#6c757d;text-transform:uppercase;margin-bottom:.5rem;">Newsletter Subscribers</div>
+    <div style="font-size:2rem;font-weight:700;color:#212529;">{{ stats.newsletter_subscribers }}</div>
+    <a href="{% url 'admin:core_newslettersubscriber_changelist' %}" style="font-size:0.8rem;color:#2c7be5;text-decoration:none;display:inline-block;margin-top:.5rem;">View &rarr;</a>
+  </div>
+
+</div>
+
+<div style="background:#fff;border:1px solid #e9ecef;border-radius:6px;padding:1.5rem 1.75rem;margin-bottom:2rem;">
+  <h5 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;color:#212529;">Quick Links</h5>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+
+    <a href="{% url 'admin:core_blogpost_add' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;border-bottom:1px solid #f1f3f5;font-size:.9rem;">+ Add Blog Post</a>
+    <a href="{% url 'admin:core_project_add' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;border-bottom:1px solid #f1f3f5;font-size:.9rem;">+ Add Project</a>
+
+    <a href="{% url 'admin:core_carouselslide_changelist' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;border-bottom:1px solid #f1f3f5;font-size:.9rem;">Manage Carousel Slides</a>
+    <a href="{% url 'admin:core_teammember_changelist' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;border-bottom:1px solid #f1f3f5;font-size:.9rem;">Manage Team Members</a>
+
+    <a href="{% url 'admin:core_newslettersubscriber_changelist' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;border-bottom:1px solid #f1f3f5;font-size:.9rem;">Newsletter Subscribers</a>
+    <a href="{% url 'admin:core_volunteer_changelist' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;border-bottom:1px solid #f1f3f5;font-size:.9rem;">View Volunteers</a>
+
+    <a href="{% url 'admin:core_footercontent_changelist' %}" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;font-size:.9rem;">Footer Content</a>
+    <a href="/" target="_blank" style="display:block;padding:.65rem 0;color:#2c7be5;text-decoration:none;font-size:.9rem;">View Live Site &rarr;</a>
+
+  </div>
+</div>
+{% endblock %}
