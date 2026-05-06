@@ -131,7 +131,7 @@ class TorchbearersAdminSite(AdminSite):
     def get_app_list(self, request, app_label=None):
         app_list = super().get_app_list(request, app_label)
 
-        hidden_model_names = {'MissionVision', 'WhoWeAre', 'TeamMember', 'Article', 'DirectorMessage'}
+        hidden_model_names = {'MissionVision', 'WhoWeAre', 'TeamMember', 'Article'}
 
         for app in app_list:
             app['models'] = [m for m in app['models'] if m['object_name'] not in hidden_model_names]
