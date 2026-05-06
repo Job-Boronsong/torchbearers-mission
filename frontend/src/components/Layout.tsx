@@ -29,22 +29,8 @@ const Navbar = ({ footerData }: { footerData: FooterContent | null }) => {
     <header className="navbar-wrapper" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
       {/* Top Bar */}
       <div style={{ backgroundColor: 'var(--brand-primary)', color: 'var(--text-light)', padding: '0.5rem 0', fontSize: '0.875rem' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            {footerData?.email && (
-              <a href={`mailto:${footerData.email}`} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <Mail size={14} /> {footerData.email}
-              </a>
-            )}
-            {footerData?.phone && (
-              <a href={`tel:${footerData.phone}`} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <Phone size={14} /> {footerData.phone}
-              </a>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button onClick={openVolunteer} style={{ background: 'none', border: 'none', color: 'inherit', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>Volunteer With Us</button>
-          </div>
+        <div className="container" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <button onClick={openVolunteer} style={{ background: 'none', border: 'none', color: 'inherit', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>Volunteer With Us</button>
         </div>
       </div>
 
