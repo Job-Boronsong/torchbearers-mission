@@ -38,6 +38,28 @@ from .models import (
 )
 
 from django.contrib.admin import AdminSite
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from .models import UserProfile
+
+
+# =====================================================
+# USER PROFILE INLINE — force password change flag
+# =====================================================
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name = "Security Settings"
+    verbose_name_plural = "Security Settings"
+    fields = ("must_change_password",)
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 # =====================================================

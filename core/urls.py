@@ -1,10 +1,8 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth import views as auth_views
 
 from . import views
-from .views import ForcedPasswordChangeView
 
 app_name = "core"
 
@@ -25,20 +23,6 @@ urlpatterns = [
     # Donations & volunteers
     path("donation/verify/", views.verify_donation, name="verify_donation"),
     path("register-volunteer/", views.register_volunteer, name="register_volunteer"),
-
-    # Password change (FORCED FLOW)
-    path(
-        "accounts/password/change/",
-        ForcedPasswordChangeView.as_view(),
-        name="password_change",
-    ),
-    path(
-        "accounts/password/change/done/",
-        auth_views.PasswordChangeDoneView.as_view(
-            template_name="registration/password_change_done.html"
-        ),
-        name="password_change_done",
-    ),
 
     path("newsletter/subscribe/", views.newsletter_subscribe, name="newsletter_subscribe"),
     path(
