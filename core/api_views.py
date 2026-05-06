@@ -10,7 +10,7 @@ import requests
 
 from .models import (
     CarouselSlide, Project, BlogPost, MissionVision, WhoWeAre,
-    TeamMember, FooterContent, Donation, ContactMessage, DirectorMessage,
+    FooterContent, Donation, ContactMessage, DirectorMessage,
     Volunteer, NewsletterSubscriber,
 )
 
@@ -151,20 +151,6 @@ def api_blog_detail(request, slug):
 def api_about(request):
     mv = MissionVision.objects.first()
     who = WhoWeAre.objects.first()
-    team = [
-        {
-            "id": m.id,
-            "name": m.name,
-            "role": m.role,
-            "photo": _image_url(request, m.photo),
-            "facebook": m.facebook,
-            "twitter": m.twitter,
-            "linkedin": m.linkedin,
-            "order": m.order,
-        }
-        for m in TeamMember.objects.filter(is_active=True).order_by("order")
-    ]
-
     dm = DirectorMessage.objects.filter(is_active=True).first()
     director_message = None
     if dm:
@@ -188,7 +174,6 @@ def api_about(request):
             "content": who.content if who else "",
         },
         "director_message": director_message,
-        "team": team,
     })
 
 

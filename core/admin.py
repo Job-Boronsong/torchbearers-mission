@@ -63,49 +63,28 @@ class WhoWeAreForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'rows': 8}),
         }
 
-TeamMemberFormSet = modelformset_factory(
-    TeamMember,
-    fields=['name', 'role', 'photo', 'facebook', 'twitter', 'linkedin', 'order', 'is_active'],
-    extra=1,
-    can_delete=True,
-    widgets={
-        'name': forms.TextInput(attrs={'style': 'width:100%'}),
-        'role': forms.TextInput(attrs={'style': 'width:100%'}),
-        'facebook': forms.URLInput(attrs={'style': 'width:100%'}),
-        'twitter': forms.URLInput(attrs={'style': 'width:100%'}),
-        'linkedin': forms.URLInput(attrs={'style': 'width:100%'}),
-        'order': forms.NumberInput(attrs={'style': 'width:80px'}),
-    }
-)
-
-
 def about_us_admin_view(request):
     mv  = MissionVision.objects.first()
     who = WhoWeAre.objects.first()
 
     if request.method == 'POST':
-        mv_form      = MissionVisionForm(request.POST, request.FILES, instance=mv,  prefix='mv')
-        who_form     = WhoWeAreForm(request.POST, instance=who, prefix='who')
-        team_formset = TeamMemberFormSet(request.POST, request.FILES,
-                                         queryset=TeamMember.objects.all(), prefix='team')
+        mv_form  = MissionVisionForm(request.POST, request.FILES, instance=mv, prefix='mv')
+        who_form = WhoWeAreForm(request.POST, instance=who, prefix='who')
 
-        if mv_form.is_valid() and who_form.is_valid() and team_formset.is_valid():
+        if mv_form.is_valid() and who_form.is_valid():
             mv_form.save()
             who_form.save()
-            team_formset.save()
             messages.success(request, 'About Us page saved successfully.')
             return redirect(request.path)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        mv_form      = MissionVisionForm(instance=mv,  prefix='mv')
-        who_form     = WhoWeAreForm(instance=who, prefix='who')
-        team_formset = TeamMemberFormSet(queryset=TeamMember.objects.all(), prefix='team')
+        mv_form  = MissionVisionForm(instance=mv, prefix='mv')
+        who_form = WhoWeAreForm(instance=who, prefix='who')
 
     return render(request, 'admin/about_us_combined.html', {
         'mv_form':      mv_form,
         'who_form':     who_form,
-        'team_formset': team_formset,
         'title':        'About Us Page',
         'site_header':  admin.site.site_header,
         'has_permission': True,

@@ -16,8 +16,6 @@
 
 <form method="post" enctype="multipart/form-data" id="about-us-form">
   {% csrf_token %}
-  {{ team_formset.management_form }}
-
   <!-- ═══════════════════════════════════════════════
        SECTION 1 — HERO
   ═══════════════════════════════════════════════ -->
@@ -103,85 +101,6 @@
         {{ mv_form.statement_of_faith }}
         {% if mv_form.statement_of_faith.errors %}<p style="color:red;">{{ mv_form.statement_of_faith.errors }}</p>{% endif %}
       </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════
-       SECTION 4 — TEAM MEMBERS
-  ═══════════════════════════════════════════════ -->
-  <div class="module" style="margin-bottom:2rem;">
-    <h2 style="background:#417690;color:#fff;padding:.8rem 1.2rem;margin:0;font-size:1rem;border-radius:4px 4px 0 0;">
-      Team Members
-    </h2>
-    <div style="padding:1.2rem 1.5rem;border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;">
-
-      <div id="team-members-container">
-        {% for form in team_formset %}
-          <div class="team-member-row" style="border:1px solid #ddd;border-radius:6px;padding:1.2rem;margin-bottom:1rem;position:relative;">
-            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">Name</label>
-                {{ form.name }}
-                {% if form.name.errors %}<p style="color:red;font-size:.8rem;">{{ form.name.errors }}</p>{% endif %}
-              </div>
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">Role</label>
-                {{ form.role }}
-                {% if form.role.errors %}<p style="color:red;font-size:.8rem;">{{ form.role.errors }}</p>{% endif %}
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">Facebook URL</label>
-                {{ form.facebook }}
-              </div>
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">Twitter URL</label>
-                {{ form.twitter }}
-              </div>
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">LinkedIn URL</label>
-                {{ form.linkedin }}
-              </div>
-            </div>
-
-            <div style="display:grid;grid-template-columns:auto auto 1fr;gap:1.5rem;align-items:center;">
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">Order</label>
-                {{ form.order }}
-              </div>
-              <div style="display:flex;align-items:center;gap:.4rem;margin-top:1.2rem;">
-                {{ form.is_active }}
-                <label style="font-weight:600;font-size:.875rem;">Active</label>
-              </div>
-              <div>
-                <label style="font-weight:600;font-size:.875rem;">Photo</label>
-                {% if form.instance.photo %}
-                  <div style="margin-bottom:.4rem;">
-                    <img src="{{ form.instance.photo.url }}" style="height:60px;border-radius:4px;border:1px solid #ddd;" alt="">
-                  </div>
-                {% endif %}
-                {{ form.photo }}
-              </div>
-            </div>
-
-            {% if team_formset.can_delete %}
-              <div style="margin-top:.8rem;display:flex;align-items:center;gap:.4rem;">
-                {{ form.DELETE }}
-                <label style="color:#c0392b;font-size:.875rem;font-weight:600;">Remove this member</label>
-              </div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-
-      <button type="button" id="add-team-member"
-        style="margin-top:.5rem;padding:.5rem 1.2rem;background:#28a745;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.875rem;">
-        + Add Team Member
-      </button>
     </div>
   </div>
 

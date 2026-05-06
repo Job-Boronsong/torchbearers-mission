@@ -141,31 +141,6 @@ export default function About() {
         </section>
       )}
 
-      {/* Team */}
-      {data?.team && data.team.length > 0 && (
-        <section className="section">
-          <div className="container">
-            <h2 className="h2 text-center" style={{ marginBottom: '3rem' }}>Our Leadership</h2>
-            <div className="grid-4">
-              {data.team.map(member => (
-                <div key={member.id} className="card text-center" style={{ padding: '2rem 1.5rem' }}>
-                  <div style={{ width: '120px', height: '120px', borderRadius: '50%', margin: '0 auto 1.5rem', overflow: 'hidden', backgroundColor: 'var(--border-color)' }}>
-                    {member.photo ? (
-                      <img src={member.photo} alt={member.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-muted)' }}>
-                        {member.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <h3 style={{ marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 700 }}>{member.name}</h3>
-                  <p style={{ color: 'var(--brand-primary)', fontWeight: 500, fontSize: '0.78rem' }}>{member.role}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 }
