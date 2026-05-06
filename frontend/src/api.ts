@@ -90,6 +90,7 @@ export interface AboutData {
     photo: string | null;
     message: string;
   } | null;
+  team: TeamMember[];
 }
 
 // API Methods
