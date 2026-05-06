@@ -138,38 +138,35 @@ const FacebookIcon = () => (
   </svg>
 );
 
-const SUBSCRIBED_KEY = 'tb_subscribed_email';
-
 const Footer = ({ footerData }: { footerData: FooterContent | null }) => {
-  const storedEmail = localStorage.getItem(SUBSCRIBED_KEY) ?? '';
   const [email, setEmail] = useState('');
-  const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'duplicate' | 'err'>(() =>
-    storedEmail ? 'ok' : 'idle'
-  );
+  const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'duplicate' | 'err'>('idle');
+
+  const resetAfterDelay = () => {
+    setTimeout(() => {
+      setSubStatus('idle');
+      setEmail('');
+    }, 5000);
+  };
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) return;
 
-    if (storedEmail && trimmed === storedEmail) {
-      setSubStatus('duplicate');
-      return;
-    }
-
     setSubStatus('loading');
     try {
       await subscribeNewsletter({ email: trimmed });
-      localStorage.setItem(SUBSCRIBED_KEY, trimmed);
       setSubStatus('ok');
-      setEmail('');
+      resetAfterDelay();
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 409) {
-        localStorage.setItem(SUBSCRIBED_KEY, trimmed);
         setSubStatus('duplicate');
+        resetAfterDelay();
       } else {
         setSubStatus('err');
+        resetAfterDelay();
       }
     }
   };
