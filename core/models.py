@@ -1,5 +1,4 @@
 from django_ckeditor_5.fields import CKEditor5Field
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
 from django.db import models
 import uuid
@@ -74,7 +73,7 @@ class Project(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
-    content = RichTextUploadingField()
+    content = CKEditor5Field("Content", config_name="default")
     feature_image = models.ImageField(upload_to='blog/', blank=True, null=True)
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

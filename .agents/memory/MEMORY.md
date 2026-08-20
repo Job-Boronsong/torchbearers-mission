@@ -1,0 +1,1 @@
+- [Managed Python upgrades](managed-python-upgrades.md) — package-managed Python upgrades can append duplicate pins; normalize the manifest before final verification.

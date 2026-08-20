@@ -63,8 +63,6 @@ INSTALLED_APPS = [
     "adminsortable2",
     "core",
     "django_ckeditor_5",
-    "ckeditor",
-    "ckeditor_uploader",
 
     "axes",
     "django_otp",
@@ -200,7 +198,7 @@ CKEDITOR_5_CONFIGS = {
                 "imageStyle:side",
             ]
         },
-        "upload_url": "/ckeditor5/upload/",
+        "upload_url": "/ckeditor5/image_upload/",
 
         "table": {
             "contentToolbar": [
