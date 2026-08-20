@@ -56,3 +56,7 @@ EMAIL_USE_TLS = "False"
 EMAIL_USE_SSL = "True"
 EMAIL_HOST_USER = "info@torchbearersmission.org"
 DEFAULT_FROM_EMAIL = "Torchbearers Mission <info@torchbearersmission.org>"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 180000
