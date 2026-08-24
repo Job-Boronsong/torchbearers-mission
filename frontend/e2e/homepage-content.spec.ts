@@ -432,6 +432,239 @@ test('homepage project and blog cards prefetch their matching detail routes befo
   await expect(page.getByRole('heading', { level: 1, name: 'Homepage Story' })).toBeVisible();
 });
 
+test('homepage hero buttons prefetch only their matching public routes before navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: {
+        effectiveType: '4g',
+        saveData: true,
+      },
+    });
+
+    const routeLoadingSelector = '[role="status"][aria-label="Loading page"]';
+    (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = false;
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (
+            node.nodeType === Node.ELEMENT_NODE
+            && ((node as Element).matches(routeLoadingSelector)
+              || (node as Element).querySelector(routeLoadingSelector))
+          ) {
+            (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = true;
+            return;
+          }
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  });
+
+  const routeChunkRequests: string[] = [];
+  page.on('request', request => {
+    const pathname = new URL(request.url()).pathname;
+    if (
+      pathname.endsWith('/src/pages/About.tsx')
+      || pathname.endsWith('/src/pages/ProjectDetail.tsx')
+      || pathname.endsWith('/src/pages/Donate.tsx')
+      || pathname.endsWith('/src/pages/Volunteer.tsx')
+    ) {
+      routeChunkRequests.push(pathname);
+    }
+  });
+
+  await page.route('**/api/home/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        slides: [
+          {
+            id: 306,
+            title: 'About Feature',
+            subtitle: 'Learn about the mission.',
+            image: null,
+            button_text: 'About the Mission',
+            button_link: '/about',
+            layout: 'center',
+          },
+          {
+            id: 307,
+            title: 'Project Feature',
+            subtitle: 'Explore the work.',
+            image: null,
+            button_text: 'Explore the Project',
+            button_link: '/projects/hero-project',
+            layout: 'center',
+          },
+          {
+            id: 308,
+            title: 'Donate Feature',
+            subtitle: 'Support the mission.',
+            image: null,
+            button_text: 'Donate Now',
+            button_link: '/donate',
+            layout: 'center',
+          },
+          {
+            id: 310,
+            title: 'Volunteer Feature',
+            subtitle: 'Serve with the mission.',
+            image: null,
+            button_text: 'Volunteer With Us',
+            button_link: '/volunteer',
+            layout: 'center',
+          },
+          {
+            id: 311,
+            title: 'Unsupported Feature',
+            subtitle: 'A route without a public loader.',
+            image: null,
+            button_text: 'Open Unsupported Route',
+            button_link: '/unknown',
+            layout: 'center',
+          },
+        ],
+        featured_projects: [],
+        featured_blogs: [],
+        total_donations: '0',
+        donor_count: 0,
+      }),
+    });
+  });
+  await page.route('**/api/projects/hero-project/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 309,
+        title: 'Hero Project',
+        slug: 'hero-project',
+        description: '<p>Impact from the hero.</p>',
+        feature_image: null,
+        created_at: '2026-08-24T00:00:00Z',
+        show_donate: false,
+      }),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'About Feature' })).toBeVisible();
+
+  const heroSection = page.locator('section').first();
+  const aboutButton = page.getByRole('link', { name: 'About the Mission' });
+  const aboutChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/About.tsx'),
+  );
+  await aboutButton.focus();
+  await aboutChunkRequest;
+  expect(routeChunkRequests).toEqual(['/src/pages/About.tsx']);
+
+  await aboutButton.click();
+  await expect(page).toHaveURL('/about');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched hero route should not show the generic route-code fallback',
+  ).toBe(false);
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'About Feature' })).toBeVisible();
+  await heroSection.getByRole('button').nth(1).click();
+  const projectButton = page.getByRole('link', { name: 'Explore the Project' });
+  await expect(projectButton).toBeVisible();
+  const projectChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/ProjectDetail.tsx'),
+  );
+  await projectButton.hover();
+  await projectChunkRequest;
+  expect(routeChunkRequests).toEqual([
+    '/src/pages/About.tsx',
+    '/src/pages/ProjectDetail.tsx',
+  ]);
+
+  await projectButton.click();
+  await expect(page).toHaveURL('/projects/hero-project');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched hero detail route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'Hero Project' })).toBeVisible();
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'About Feature' })).toBeVisible();
+  await heroSection.getByRole('button').nth(1).click();
+  await heroSection.getByRole('button').nth(1).click();
+  const donateButton = page.getByRole('link', { name: 'Donate Now' });
+  await expect(donateButton).toBeVisible();
+  const donateChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/Donate.tsx'),
+  );
+  await donateButton.focus();
+  await donateChunkRequest;
+  expect(routeChunkRequests).toEqual([
+    '/src/pages/About.tsx',
+    '/src/pages/ProjectDetail.tsx',
+    '/src/pages/Donate.tsx',
+  ]);
+
+  await donateButton.click();
+  await expect(page).toHaveURL('/donate');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched donate route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'Support the Mission' })).toBeVisible();
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'About Feature' })).toBeVisible();
+  await heroSection.getByRole('button').nth(1).click();
+  await heroSection.getByRole('button').nth(1).click();
+  await heroSection.getByRole('button').nth(1).click();
+  const volunteerButton = page.getByRole('link', { name: 'Volunteer With Us' });
+  await expect(volunteerButton).toBeVisible();
+  const volunteerChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/Volunteer.tsx'),
+  );
+  await volunteerButton.hover();
+  await volunteerChunkRequest;
+  expect(routeChunkRequests).toEqual([
+    '/src/pages/About.tsx',
+    '/src/pages/ProjectDetail.tsx',
+    '/src/pages/Donate.tsx',
+    '/src/pages/Volunteer.tsx',
+  ]);
+
+  await volunteerButton.click();
+  await expect(page).toHaveURL('/volunteer');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched volunteer route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'Volunteer With Us' })).toBeVisible();
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'About Feature' })).toBeVisible();
+  await heroSection.getByRole('button').nth(1).click();
+  await heroSection.getByRole('button').nth(1).click();
+  await heroSection.getByRole('button').nth(1).click();
+  await heroSection.getByRole('button').nth(1).click();
+  const unsupportedButton = page.getByRole('link', { name: 'Open Unsupported Route' });
+  await expect(unsupportedButton).toBeVisible();
+  await unsupportedButton.hover();
+  await page.waitForTimeout(100);
+  expect(
+    routeChunkRequests,
+    'an unsupported hero route should not preload unrelated code',
+  ).toEqual([
+    '/src/pages/About.tsx',
+    '/src/pages/ProjectDetail.tsx',
+    '/src/pages/Donate.tsx',
+    '/src/pages/Volunteer.tsx',
+  ]);
+});
+
 const cachedHomepageBody = {
   slides: [{
     id: 1,

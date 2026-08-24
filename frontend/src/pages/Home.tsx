@@ -11,7 +11,7 @@ import type { HomeData } from '../api';
 import { format } from 'date-fns';
 import { useDonate } from '../context/useDonate';
 import { useVolunteer } from '../context/useVolunteer';
-import { preloadPublicRoute } from '../routeLoaders';
+import { preloadHeroRoute, preloadPublicRoute } from '../routeLoaders';
 
 const prefetchProject = (slug: string) => {
   void preloadPublicRoute(`/projects/${slug}`).catch(() => undefined);
@@ -19,6 +19,10 @@ const prefetchProject = (slug: string) => {
 
 const prefetchBlogPost = (slug: string) => {
   void preloadPublicRoute(`/blog/${slug}`).catch(() => undefined);
+};
+
+const prefetchHeroRoute = (pathname: string) => {
+  void preloadHeroRoute(pathname).catch(() => undefined);
 };
 
 export default function Home() {
@@ -163,7 +167,13 @@ export default function Home() {
                   </p>
                   {slide.button_text && (
                     <div style={{ transform: `translateY(${index === currentSlide ? 0 : '20px'})`, opacity: index === currentSlide ? 1 : 0, transition: 'all 0.8s ease-out 0.6s' }}>
-                      <Link to={slide.button_link || '/'} className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+                      <Link
+                        to={slide.button_link || '/'}
+                        className="btn btn-primary"
+                        style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}
+                        onMouseEnter={() => prefetchHeroRoute(slide.button_link || '/')}
+                        onFocus={() => prefetchHeroRoute(slide.button_link || '/')}
+                      >
                         {slide.button_text}
                       </Link>
                     </div>

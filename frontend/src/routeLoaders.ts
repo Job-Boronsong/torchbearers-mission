@@ -19,6 +19,12 @@ const publicRouteLoaders: Record<string, PublicRouteLoader> = {
   '/contact': loadContact,
 };
 
+const publicHeroRouteLoaders: Record<string, PublicRouteLoader> = {
+  ...publicRouteLoaders,
+  '/donate': loadDonate,
+  '/volunteer': loadVolunteer,
+};
+
 const publicDetailRouteLoaders: Array<{ prefix: string; loader: PublicRouteLoader }> = [
   { prefix: '/projects/', loader: loadProjectDetail },
   { prefix: '/blog/', loader: loadBlogDetail },
@@ -49,6 +55,12 @@ export const canPrefetchPublicRoutes = () => {
 
 export const preloadPublicRoute = (pathname: string) => (
   publicRouteLoaders[pathname]?.()
+    ?? publicDetailRouteLoaders.find(route => pathname.startsWith(route.prefix))?.loader()
+    ?? Promise.resolve()
+);
+
+export const preloadHeroRoute = (pathname: string) => (
+  publicHeroRouteLoaders[pathname]?.()
     ?? publicDetailRouteLoaders.find(route => pathname.startsWith(route.prefix))?.loader()
     ?? Promise.resolve()
 );
