@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Send, X } from 'lucide-react';
+import Send from 'lucide-react/dist/esm/icons/send.mjs';
+import X from 'lucide-react/dist/esm/icons/x.mjs';
 import { submitVolunteer } from '../api';
 import { volunteerModalContext } from './useVolunteer';
 

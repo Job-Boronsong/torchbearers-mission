@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.mjs';
 import { getBlog } from '../api';
 import type { BlogPost } from '../api';
 import { format } from 'date-fns';

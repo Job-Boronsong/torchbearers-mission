@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Heart, Users, Globe, ChevronLeft, ChevronRight } from 'lucide-react';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.mjs';
+import Heart from 'lucide-react/dist/esm/icons/heart.mjs';
+import Users from 'lucide-react/dist/esm/icons/users.mjs';
+import Globe from 'lucide-react/dist/esm/icons/globe.mjs';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left.mjs';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right.mjs';
 import { getHome } from '../api';
 import type { HomeData } from '../api';
 import { format } from 'date-fns';

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Heart, ArrowLeft } from 'lucide-react';
+import Heart from 'lucide-react/dist/esm/icons/heart.mjs';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.mjs';
 import { getProject } from '../api';
 import type { Project } from '../api';
 import { format } from 'date-fns';

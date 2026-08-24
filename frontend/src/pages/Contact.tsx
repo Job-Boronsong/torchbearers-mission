@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Mail, MapPin, Phone, Send } from 'lucide-react';
+import Mail from 'lucide-react/dist/esm/icons/mail.mjs';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin.mjs';
+import Phone from 'lucide-react/dist/esm/icons/phone.mjs';
+import Send from 'lucide-react/dist/esm/icons/send.mjs';
 import { isAxiosError } from 'axios';
 import { submitContact } from '../api';
 

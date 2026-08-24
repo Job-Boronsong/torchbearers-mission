@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Users, Send } from 'lucide-react';
+import Users from 'lucide-react/dist/esm/icons/users.mjs';
+import Send from 'lucide-react/dist/esm/icons/send.mjs';
 import { isAxiosError } from 'axios';
 import { submitVolunteer } from '../api';
 

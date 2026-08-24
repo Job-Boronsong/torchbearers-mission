@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle, XCircle } from 'lucide-react';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle.mjs';
+import XCircle from 'lucide-react/dist/esm/icons/x-circle.mjs';
 import { unsubscribeNewsletter } from '../api';
 
 export default function Unsubscribe() {

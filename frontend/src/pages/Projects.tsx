@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Globe } from 'lucide-react';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.mjs';
+import Globe from 'lucide-react/dist/esm/icons/globe.mjs';
 import { getProjects } from '../api';
 import type { Project } from '../api';
 

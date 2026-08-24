@@ -1,4 +1,6 @@
-import { Heart, Building, Phone } from 'lucide-react';
+import Heart from 'lucide-react/dist/esm/icons/heart.mjs';
+import Building from 'lucide-react/dist/esm/icons/building.mjs';
+import Phone from 'lucide-react/dist/esm/icons/phone.mjs';
 
 export default function Donate() {
   return (

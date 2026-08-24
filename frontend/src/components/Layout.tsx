@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Mail, Phone, MapPin, Heart, Users } from 'lucide-react';
+import Menu from 'lucide-react/dist/esm/icons/menu.mjs';
+import X from 'lucide-react/dist/esm/icons/x.mjs';
+import Mail from 'lucide-react/dist/esm/icons/mail.mjs';
+import Phone from 'lucide-react/dist/esm/icons/phone.mjs';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin.mjs';
+import Heart from 'lucide-react/dist/esm/icons/heart.mjs';
+import Users from 'lucide-react/dist/esm/icons/users.mjs';
 import { getFooter, subscribeNewsletter } from '../api';
 import type { FooterContent } from '../api';
 import { useDonate } from '../context/useDonate';
