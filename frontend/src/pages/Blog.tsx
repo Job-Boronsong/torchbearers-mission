@@ -4,28 +4,60 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.mjs';
 import { getBlogs } from '../api';
 import type { BlogPost } from '../api';
 import { format } from 'date-fns';
+import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     getBlogs()
       .then(res => {
-        setPosts(res);
-        setLoading(false);
+        if (isMounted) {
+          setPosts(res);
+          setHasError(false);
+        }
       })
       .catch(err => {
         console.error(err);
-        setLoading(false);
+        if (isMounted) {
+          setHasError(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
       });
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [retryAttempt]);
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-label="Loading blog">
         <div className="loading-spinner"></div>
       </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <ContentUnavailable
+        title="We couldn’t load the blog"
+        description="Something went wrong while loading our latest stories. Please try again."
+        onRetry={() => {
+          setLoading(true);
+          setHasError(false);
+          setRetryAttempt(attempt => attempt + 1);
+        }}
+      />
     );
   }
 

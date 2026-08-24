@@ -4,28 +4,60 @@ import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.mjs';
 import Globe from 'lucide-react/dist/esm/icons/globe.mjs';
 import { getProjects } from '../api';
 import type { Project } from '../api';
+import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     getProjects()
       .then(res => {
-        setProjects(res);
-        setLoading(false);
+        if (isMounted) {
+          setProjects(res);
+          setHasError(false);
+        }
       })
       .catch(err => {
         console.error(err);
-        setLoading(false);
+        if (isMounted) {
+          setHasError(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
       });
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [retryAttempt]);
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-label="Loading projects">
         <div className="loading-spinner"></div>
       </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <ContentUnavailable
+        title="We couldn’t load our projects"
+        description="Something went wrong while loading our projects. Please try again."
+        onRetry={() => {
+          setLoading(true);
+          setHasError(false);
+          setRetryAttempt(attempt => attempt + 1);
+        }}
+      />
     );
   }
 

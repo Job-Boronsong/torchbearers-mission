@@ -4,28 +4,47 @@ import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.mjs';
 import { getBlog } from '../api';
 import type { BlogPost } from '../api';
 import { format } from 'date-fns';
+import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function BlogDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
+    let isMounted = true;
+
     getBlog(slug)
       .then(res => {
-        setPost(res);
-        setLoading(false);
+        if (isMounted) {
+          setPost(res);
+          setError(false);
+          setLoadedSlug(slug);
+        }
       })
       .catch(err => {
         console.error(err);
-        setError(true);
-        setLoading(false);
+        if (isMounted) {
+          setError(true);
+          setLoadedSlug(slug);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
       });
-  }, [slug]);
 
-  if (loading) {
+    return () => {
+      isMounted = false;
+    };
+  }, [slug, retryAttempt]);
+
+  if (loading || loadedSlug !== slug) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
@@ -35,11 +54,17 @@ export default function BlogDetail() {
 
   if (error || !post) {
     return (
-      <div className="container section text-center">
-        <h2 className="h2" style={{ marginBottom: '1rem' }}>Article Not Found</h2>
-        <p style={{ marginBottom: '2rem' }}>We couldn't find the article you were looking for.</p>
+      <ContentUnavailable
+        title="We couldn’t load this article"
+        description="Something went wrong while loading this article. Please try again."
+        onRetry={() => {
+          setLoading(true);
+          setError(false);
+          setRetryAttempt(attempt => attempt + 1);
+        }}
+      >
         <Link to="/blog" className="btn btn-outline">Back to Blog</Link>
-      </div>
+      </ContentUnavailable>
     );
   }
 

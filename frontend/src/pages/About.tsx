@@ -1,28 +1,60 @@
 import { useState, useEffect } from 'react';
 import { getAbout } from '../api';
 import type { AboutData } from '../api';
+import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function About() {
   const [data, setData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     getAbout()
       .then(res => {
-        setData(res);
-        setLoading(false);
+        if (isMounted) {
+          setData(res);
+          setHasError(false);
+        }
       })
       .catch(err => {
         console.error(err);
-        setLoading(false);
+        if (isMounted) {
+          setHasError(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
       });
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [retryAttempt]);
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-label="Loading about page">
         <div className="loading-spinner"></div>
       </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <ContentUnavailable
+        title="We couldn’t load the about page"
+        description="Something went wrong while loading our story. Please try again."
+        onRetry={() => {
+          setLoading(true);
+          setHasError(false);
+          setRetryAttempt(attempt => attempt + 1);
+        }}
+      />
     );
   }
 
