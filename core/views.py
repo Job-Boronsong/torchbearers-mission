@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
 from urllib.parse import quote, urlparse
+from decimal import Decimal, InvalidOperation
 from .models import (
     MissionVision,
     ContactMessage,
@@ -231,6 +232,30 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _parse_flutterwave_amount(value):
+    """Return a storable donation amount, or None for an invalid response value."""
+    if isinstance(value, bool):
+        return None
+
+    try:
+        amount = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+
+    if not amount.is_finite() or amount <= 0:
+        return None
+
+    try:
+        normalized_amount = amount.quantize(Decimal("0.01"))
+    except InvalidOperation:
+        return None
+
+    if normalized_amount != amount or len(normalized_amount.as_tuple().digits) > 10:
+        return None
+
+    return normalized_amount
+
+
 @require_GET
 def verify_donation(request):
     transaction_id = request.GET.get("transaction_id")
@@ -270,22 +295,28 @@ def verify_donation(request):
         logger.error(f"Flutterwave verification failed: {e}")
         return redirect("/")
 
-    if data.get("status") != "success":
+    if not isinstance(data, dict) or data.get("status") != "success":
         return redirect("/")
 
-    tx_data = data.get("data", {})
-    if tx_data.get("status") != "successful":
+    tx_data = data.get("data")
+    if not isinstance(tx_data, dict) or tx_data.get("status") != "successful":
         return redirect("/")
 
-    # 🛡️ Validate currency & amount
+    if str(tx_data.get("id")) != transaction_id:
+        return redirect("/")
+
+    # 🛡️ Validate currency & amount before creating a verified donation.
     if tx_data.get("currency") != "GHS":
         return redirect("/")
 
-    amount = tx_data.get("amount")
-    if not amount or amount <= 0:
+    amount = _parse_flutterwave_amount(tx_data.get("amount"))
+    if amount is None:
         return redirect("/")
 
     customer = tx_data.get("customer", {})
+    if not isinstance(customer, dict):
+        return redirect("/")
+
     fw_payment_type = tx_data.get("payment_type", "")
 
     if fw_payment_type == "card":

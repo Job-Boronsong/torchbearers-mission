@@ -255,6 +255,7 @@ class DonationVerificationSecurityTests(TestCase):
         payment_response.json.return_value = {
             "status": "success",
             "data": {
+                "id": int(transaction_id),
                 "status": "successful",
                 "currency": "GHS",
                 "amount": 50,
@@ -293,3 +294,87 @@ class DonationVerificationSecurityTests(TestCase):
         self.assertEqual(donation.payment_method, "visa")
         self.assertTrue(donation.is_verified)
         send_mail.assert_called_once()
+
+    @override_settings(FLUTTERWAVE_SECRET_KEY="test-flutterwave-secret")
+    @patch("core.views.send_mail")
+    @patch("core.views.requests.get")
+    def test_verify_donation_rejects_unsuccessful_or_mismatched_payment_responses(
+        self, get, send_mail
+    ):
+        transaction_id = "1234567890"
+        valid_transaction_data = {
+            "id": int(transaction_id),
+            "status": "successful",
+            "currency": "GHS",
+            "amount": 50,
+            "customer": {
+                "name": "Ama Mensah",
+                "email": "ama@example.com",
+            },
+            "payment_type": "card",
+        }
+        rejected_responses = (
+            (
+                "unsuccessful API response",
+                {"status": "error", "data": valid_transaction_data},
+            ),
+            (
+                "unsuccessful transaction",
+                {
+                    "status": "success",
+                    "data": {**valid_transaction_data, "status": "failed"},
+                },
+            ),
+            (
+                "mismatched transaction ID",
+                {
+                    "status": "success",
+                    "data": {**valid_transaction_data, "id": 987654321},
+                },
+            ),
+            (
+                "wrong currency",
+                {
+                    "status": "success",
+                    "data": {**valid_transaction_data, "currency": "USD"},
+                },
+            ),
+            (
+                "zero amount",
+                {
+                    "status": "success",
+                    "data": {**valid_transaction_data, "amount": 0},
+                },
+            ),
+            (
+                "negative amount",
+                {
+                    "status": "success",
+                    "data": {**valid_transaction_data, "amount": -1},
+                },
+            ),
+            (
+                "non-numeric amount",
+                {
+                    "status": "success",
+                    "data": {**valid_transaction_data, "amount": "not-an-amount"},
+                },
+            ),
+        )
+
+        for case, response_data in rejected_responses:
+            with self.subTest(case=case):
+                payment_response = Mock()
+                payment_response.json.return_value = response_data
+                get.return_value = payment_response
+
+                response = self.client.get(
+                    self.verify_url,
+                    {"transaction_id": transaction_id},
+                )
+
+                self.assertRedirects(response, "/")
+                self.assertFalse(Donation.objects.exists())
+
+        self.assertEqual(get.call_count, len(rejected_responses))
+        send_mail.assert_not_called()
