@@ -99,7 +99,20 @@ export const getProject = (slug: string) => api.get<Project>(`/projects/${slug}/
 export const getBlogs = () => api.get<{ posts: BlogPost[] }>('/blog/').then(res => res.data.posts);
 export const getBlog = (slug: string) => api.get<BlogPost>(`/blog/${slug}/`).then(res => res.data);
 export const getAbout = () => api.get<AboutData>('/about/').then(res => res.data);
-export const getFooter = () => api.get<FooterContent>('/footer/').then(res => res.data);
+
+let footerRequest: Promise<FooterContent> | null = null;
+
+export const getFooter = () => {
+  if (!footerRequest) {
+    footerRequest = api.get<FooterContent>('/footer/')
+      .then(res => res.data)
+      .finally(() => {
+        footerRequest = null;
+      });
+  }
+
+  return footerRequest;
+};
 export const getStats = () => api.get<Stats>('/stats/').then(res => res.data);
 
 export const submitContact = (data: { name: string; email: string; subject: string; message: string }) => 

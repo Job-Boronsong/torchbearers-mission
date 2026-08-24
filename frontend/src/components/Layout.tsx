@@ -373,8 +373,8 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         }
       })
       .catch(err => {
-        console.error(err);
         if (isMounted) {
+          console.error(err);
           setFooterStatus('error');
         }
       });

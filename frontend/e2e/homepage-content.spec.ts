@@ -117,7 +117,7 @@ test('footer contact details can be retried without hiding footer navigation', a
   await page.route('**/api/footer/', async (route) => {
     footerRequests += 1;
 
-    if (footerRequests <= 2) {
+    if (footerRequests === 1) {
       await route.fulfill({
         status: 503,
         contentType: 'application/json',
@@ -148,6 +148,7 @@ test('footer contact details can be retried without hiding footer navigation', a
   await expect(
     footer.getByRole('alert'),
   ).toContainText('We couldn’t load our contact details. Please try again.');
+  expect(footerRequests, 'initial footer loads should share one request').toBe(1);
   await expect(footer.getByRole('link', { name: 'About', exact: true })).toBeVisible();
   await expect(footer.getByRole('heading', { name: 'Our Location' })).toBeVisible();
   await expect(footer.getByTitle('Torchbearers Mission Location')).toBeVisible();
