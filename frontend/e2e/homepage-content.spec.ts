@@ -285,6 +285,153 @@ test('project and blog cards prefetch their matching detail routes before naviga
   await expect(page.getByRole('heading', { level: 1, name: 'A New Chapter' })).toBeVisible();
 });
 
+test('homepage project and blog cards prefetch their matching detail routes before navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: {
+        effectiveType: '4g',
+        saveData: true,
+      },
+    });
+
+    const routeLoadingSelector = '[role="status"][aria-label="Loading page"]';
+    (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = false;
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (
+            node.nodeType === Node.ELEMENT_NODE
+            && ((node as Element).matches(routeLoadingSelector)
+              || (node as Element).querySelector(routeLoadingSelector))
+          ) {
+            (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = true;
+            return;
+          }
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  });
+
+  const detailChunkRequests: string[] = [];
+  page.on('request', request => {
+    const pathname = new URL(request.url()).pathname;
+    if (pathname.endsWith('/src/pages/ProjectDetail.tsx') || pathname.endsWith('/src/pages/BlogDetail.tsx')) {
+      detailChunkRequests.push(pathname);
+    }
+  });
+
+  await page.route('**/api/home/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        slides: [{
+          id: 303,
+          title: 'Homepage Feature',
+          subtitle: 'Stories of impact.',
+          image: null,
+          button_text: '',
+          button_link: '',
+          layout: 'center',
+        }],
+        featured_projects: [{
+          id: 304,
+          title: 'Homepage Project',
+          slug: 'homepage-project',
+          feature_image: null,
+          created_at: '2026-08-24T00:00:00Z',
+          show_donate: false,
+        }],
+        featured_blogs: [{
+          id: 305,
+          title: 'Homepage Story',
+          slug: 'homepage-story',
+          feature_image: null,
+          seo_description: 'A homepage story.',
+          content: '<p>Serving together.</p>',
+          created_at: '2026-08-24T00:00:00Z',
+        }],
+        total_donations: '0',
+        donor_count: 0,
+      }),
+    });
+  });
+  await page.route('**/api/projects/homepage-project/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 304,
+        title: 'Homepage Project',
+        slug: 'homepage-project',
+        description: '<p>Impact from the homepage.</p>',
+        feature_image: null,
+        created_at: '2026-08-24T00:00:00Z',
+        show_donate: false,
+      }),
+    });
+  });
+  await page.route('**/api/blog/homepage-story/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 305,
+        title: 'Homepage Story',
+        slug: 'homepage-story',
+        feature_image: null,
+        seo_description: 'A homepage story.',
+        content: '<p>Serving together.</p>',
+        created_at: '2026-08-24T00:00:00Z',
+      }),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Homepage Feature' })).toBeVisible();
+
+  const projectLink = page.locator('a[href="/projects/homepage-project"]');
+  const projectChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/ProjectDetail.tsx'),
+  );
+  await projectLink.focus();
+  await projectChunkRequest;
+  expect(detailChunkRequests).toEqual(['/src/pages/ProjectDetail.tsx']);
+
+  await projectLink.click();
+  await expect(page).toHaveURL('/projects/homepage-project');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched homepage project detail route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'Homepage Project' })).toBeVisible();
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Homepage Feature' })).toBeVisible();
+
+  const blogLink = page.locator('a[href="/blog/homepage-story"]');
+  const blogChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/BlogDetail.tsx'),
+  );
+  await blogLink.hover();
+  await blogChunkRequest;
+  expect(detailChunkRequests).toEqual([
+    '/src/pages/ProjectDetail.tsx',
+    '/src/pages/BlogDetail.tsx',
+  ]);
+
+  await blogLink.click();
+  await expect(page).toHaveURL('/blog/homepage-story');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched homepage blog detail route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'Homepage Story' })).toBeVisible();
+});
+
 const cachedHomepageBody = {
   slides: [{
     id: 1,

@@ -11,6 +11,15 @@ import type { HomeData } from '../api';
 import { format } from 'date-fns';
 import { useDonate } from '../context/useDonate';
 import { useVolunteer } from '../context/useVolunteer';
+import { preloadPublicRoute } from '../routeLoaders';
+
+const prefetchProject = (slug: string) => {
+  void preloadPublicRoute(`/projects/${slug}`).catch(() => undefined);
+};
+
+const prefetchBlogPost = (slug: string) => {
+  void preloadPublicRoute(`/blog/${slug}`).catch(() => undefined);
+};
 
 export default function Home() {
   const { openDonate } = useDonate();
@@ -237,7 +246,14 @@ export default function Home() {
             
             <div className="grid-3">
               {data.featured_projects.map(project => (
-                <Link to={`/projects/${project.slug}`} key={project.id} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link
+                  to={`/projects/${project.slug}`}
+                  key={project.id}
+                  className="card"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onMouseEnter={() => prefetchProject(project.slug)}
+                  onFocus={() => prefetchProject(project.slug)}
+                >
                   {project.feature_image ? (
                     <img src={project.feature_image} alt={project.title} className="card-img" />
                   ) : (
@@ -293,7 +309,14 @@ export default function Home() {
             
             <div className="grid-3">
               {data.featured_blogs.map(post => (
-                <Link to={`/blog/${post.slug}`} key={post.id} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link
+                  to={`/blog/${post.slug}`}
+                  key={post.id}
+                  className="card"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onMouseEnter={() => prefetchBlogPost(post.slug)}
+                  onFocus={() => prefetchBlogPost(post.slug)}
+                >
                   {post.feature_image ? (
                     <img src={post.feature_image} alt={post.title} className="card-img" style={{ height: '200px' }} />
                   ) : (
