@@ -77,6 +77,71 @@ test('homepage content loads from the Django API', async ({ page }) => {
   expect(failedApiResponses, 'homepage API responses returned errors').toEqual([]);
 });
 
+test('public navigation prefetches a first visit before navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: {
+        effectiveType: '4g',
+        saveData: true,
+      },
+    });
+    (window as unknown as { idleCallbackScheduled?: boolean }).idleCallbackScheduled = false;
+    Object.defineProperty(window, 'requestIdleCallback', {
+      configurable: true,
+      value: () => {
+        (window as unknown as { idleCallbackScheduled?: boolean }).idleCallbackScheduled = true;
+        return 1;
+      },
+    });
+
+    const routeLoadingSelector = '[role="status"][aria-label="Loading page"]';
+    (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = false;
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (
+            node.nodeType === Node.ELEMENT_NODE
+            && ((node as Element).matches(routeLoadingSelector)
+              || (node as Element).querySelector(routeLoadingSelector))
+          ) {
+            (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = true;
+            return;
+          }
+        }
+      }
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  });
+
+  await page.goto('/');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { idleCallbackScheduled?: boolean }).idleCallbackScheduled)),
+    'Save-Data should suppress background route prefetching',
+  ).toBe(false);
+  const aboutLink = page.getByRole('banner').getByRole('link', { name: 'About Us', exact: true });
+  const aboutChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/About.tsx'),
+  );
+  await aboutLink.hover();
+  await aboutChunkRequest;
+
+  const blogLink = page.getByRole('banner').getByRole('link', { name: 'Blog', exact: true });
+  const blogChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/Blog.tsx'),
+  );
+  await blogLink.focus();
+  await blogChunkRequest;
+
+  await aboutLink.click();
+  await expect(page).toHaveURL('/about');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched public route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'About Us' })).toBeVisible();
+});
+
 const cachedHomepageBody = {
   slides: [{
     id: 1,

@@ -12,6 +12,15 @@ import { getFooter, subscribeNewsletter } from '../api';
 import type { FooterContent } from '../api';
 import { useDonate } from '../context/useDonate';
 import { useVolunteer } from '../context/useVolunteer';
+import {
+  canPrefetchPublicRoutes,
+  preloadPublicRoute,
+  preloadPublicRoutes,
+} from '../routeLoaders';
+
+const prefetchRoute = (pathname: string) => {
+  void preloadPublicRoute(pathname).catch(() => undefined);
+};
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +34,33 @@ const Navbar = () => {
     return () => window.removeEventListener('popstate', closeMenu);
   }, []);
 
+  useEffect(() => {
+    if (!canPrefetchPublicRoutes()) {
+      return;
+    }
+
+    let cancelled = false;
+    const prefetch = () => {
+      if (!cancelled) {
+        void preloadPublicRoutes(location.pathname).catch(() => undefined);
+      }
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      const idleCallbackId = window.requestIdleCallback(prefetch, { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(idleCallbackId);
+      };
+    }
+
+    const timeoutId = window.setTimeout(prefetch, 1000);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [location.pathname]);
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'About Us', path: '/about' },
@@ -37,7 +73,12 @@ const Navbar = () => {
     <header className="navbar-wrapper" style={{ position: 'sticky', top: 0, zIndex: 50, backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
       {/* Main Nav */}
       <div className="container" style={{ padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)' }}>
+        <Link
+          to="/"
+          onMouseEnter={() => prefetchRoute('/')}
+          onFocus={() => prefetchRoute('/')}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-main)' }}
+        >
           <img
             src="/logo.png"
             alt="Torchbearers Mission Incorporated"
@@ -55,7 +96,9 @@ const Navbar = () => {
             {navLinks.map((link) => (
               <li key={link.path}>
                 <Link 
-                  to={link.path} 
+                  to={link.path}
+                  onMouseEnter={() => prefetchRoute(link.path)}
+                  onFocus={() => prefetchRoute(link.path)}
                   style={{ 
                     color: location.pathname === link.path ? 'var(--brand-primary)' : 'var(--text-main)',
                     fontWeight: location.pathname === link.path ? 600 : 500,
@@ -103,7 +146,9 @@ const Navbar = () => {
             {navLinks.map((link) => (
               <li key={link.path}>
                 <Link
-                  to={link.path} 
+                  to={link.path}
+                  onMouseEnter={() => prefetchRoute(link.path)}
+                  onFocus={() => prefetchRoute(link.path)}
                   onClick={() => setIsOpen(false)}
                   style={{ 
                     display: 'block',
@@ -300,8 +345,12 @@ const Footer = ({ footerData, status, onRetry }: FooterProps) => {
               ].map(link => (
                 <li key={link.to}>
                   <Link to={link.to} style={linkStyle}
-                    onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+                    onMouseEnter={e => {
+                      prefetchRoute(link.to);
+                      e.currentTarget.style.opacity = '0.7';
+                    }}
                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                    onFocus={() => prefetchRoute(link.to)}
                   >{link.label}</Link>
                 </li>
               ))}
