@@ -291,9 +291,42 @@ class DonationVerificationSecurityTests(TestCase):
         self.assertEqual(donation.donor_name, "Ama Mensah")
         self.assertEqual(donation.email, "ama@example.com")
         self.assertEqual(donation.amount, 50)
-        self.assertEqual(donation.payment_method, "visa")
+        self.assertEqual(donation.payment_method, "card")
         self.assertTrue(donation.is_verified)
         send_mail.assert_called_once()
+
+    @override_settings(FLUTTERWAVE_SECRET_KEY="test-flutterwave-secret")
+    @patch("core.views.send_mail")
+    @patch("core.views.requests.get")
+    def test_verify_donation_rejects_unsupported_payment_method(
+        self, get, send_mail
+    ):
+        transaction_id = "1234567890"
+        payment_response = Mock()
+        payment_response.json.return_value = {
+            "status": "success",
+            "data": {
+                "id": int(transaction_id),
+                "status": "successful",
+                "currency": "GHS",
+                "amount": 50,
+                "customer": {
+                    "name": "Ama Mensah",
+                    "email": "ama@example.com",
+                },
+                "payment_type": "banktransfer",
+            },
+        }
+        get.return_value = payment_response
+
+        response = self.client.get(
+            self.verify_url,
+            {"transaction_id": transaction_id},
+        )
+
+        self.assertRedirects(response, "/")
+        self.assertFalse(Donation.objects.exists())
+        send_mail.assert_not_called()
 
     @override_settings(FLUTTERWAVE_SECRET_KEY="test-flutterwave-secret")
     @patch("core.views.send_mail")

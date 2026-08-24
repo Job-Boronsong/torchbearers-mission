@@ -320,11 +320,11 @@ def verify_donation(request):
     fw_payment_type = tx_data.get("payment_type", "")
 
     if fw_payment_type == "card":
-        payment_method = "visa"
+        payment_method = "card"
     elif fw_payment_type == "mobilemoneyghana":
         payment_method = "momo"
     else:
-        payment_method = fw_payment_type
+        return redirect("/")
 
     with transaction.atomic():
         donation, created = Donation.objects.get_or_create(
