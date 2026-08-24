@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
-import { getAbout } from '../api';
+import { getAbout, getCachedPublicContent } from '../api';
 import type { AboutData } from '../api';
 import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function About() {
-  const [data, setData] = useState<AboutData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AboutData | null>(() => getCachedPublicContent<AboutData>('about') ?? null);
+  const [loading, setLoading] = useState(() => !getCachedPublicContent<AboutData>('about'));
   const [hasError, setHasError] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
 
-    getAbout()
+    getAbout({ forceRefresh: retryAttempt > 0 })
       .then(res => {
         if (isMounted) {
           setData(res);

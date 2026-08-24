@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.mjs';
-import { getBlogs } from '../api';
+import { getBlogs, getCachedPublicContent } from '../api';
 import type { BlogPost } from '../api';
 import { format } from 'date-fns';
 import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function Blog() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<BlogPost[]>(
+    () => getCachedPublicContent<BlogPost[]>('blogs') ?? [],
+  );
+  const [loading, setLoading] = useState(() => !getCachedPublicContent<BlogPost[]>('blogs'));
   const [hasError, setHasError] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
 
-    getBlogs()
+    getBlogs({ forceRefresh: retryAttempt > 0 })
       .then(res => {
         if (isMounted) {
           setPosts(res);

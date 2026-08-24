@@ -2,20 +2,22 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.mjs';
 import Globe from 'lucide-react/dist/esm/icons/globe.mjs';
-import { getProjects } from '../api';
+import { getCachedPublicContent, getProjects } from '../api';
 import type { Project } from '../api';
 import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>(
+    () => getCachedPublicContent<Project[]>('projects') ?? [],
+  );
+  const [loading, setLoading] = useState(() => !getCachedPublicContent<Project[]>('projects'));
   const [hasError, setHasError] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
 
-    getProjects()
+    getProjects({ forceRefresh: retryAttempt > 0 })
       .then(res => {
         if (isMounted) {
           setProjects(res);

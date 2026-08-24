@@ -6,7 +6,7 @@ import Users from 'lucide-react/dist/esm/icons/users.mjs';
 import Globe from 'lucide-react/dist/esm/icons/globe.mjs';
 import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left.mjs';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right.mjs';
-import { getHome } from '../api';
+import { getCachedPublicContent, getHome } from '../api';
 import type { HomeData } from '../api';
 import { format } from 'date-fns';
 import { useDonate } from '../context/useDonate';
@@ -15,8 +15,8 @@ import { useVolunteer } from '../context/useVolunteer';
 export default function Home() {
   const { openDonate } = useDonate();
   const { openVolunteer } = useVolunteer();
-  const [data, setData] = useState<HomeData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<HomeData | null>(() => getCachedPublicContent<HomeData>('home') ?? null);
+  const [loading, setLoading] = useState(() => !getCachedPublicContent<HomeData>('home'));
   const [hasError, setHasError] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -24,7 +24,7 @@ export default function Home() {
   useEffect(() => {
     let isMounted = true;
 
-    getHome()
+    getHome({ forceRefresh: retryAttempt > 0 })
       .then(res => {
         if (isMounted) {
           setData(res);

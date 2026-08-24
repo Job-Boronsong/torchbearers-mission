@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Heart from 'lucide-react/dist/esm/icons/heart.mjs';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.mjs';
-import { getProject } from '../api';
+import { getCachedPublicContent, getProject } from '../api';
 import type { Project } from '../api';
 import { format } from 'date-fns';
 import { useDonate } from '../context/useDonate';
@@ -11,17 +11,18 @@ import ContentUnavailable from '../components/ContentUnavailable';
 export default function ProjectDetail() {
   const { openDonate } = useDonate();
   const { slug } = useParams<{ slug: string }>();
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cachedProject = slug ? getCachedPublicContent<Project>(`project:${slug}`) : undefined;
+  const [project, setProject] = useState<Project | null>(cachedProject ?? null);
+  const [loading, setLoading] = useState(() => !cachedProject);
   const [error, setError] = useState(false);
-  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(cachedProject ? slug ?? null : null);
   const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
     let isMounted = true;
 
-    getProject(slug)
+    getProject(slug, { forceRefresh: retryAttempt > 0 })
       .then(res => {
         if (isMounted) {
           setProject(res);
@@ -49,7 +50,7 @@ export default function ProjectDetail() {
 
   if (loading || loadedSlug !== slug) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-label="Loading project">
         <div className="loading-spinner"></div>
       </div>
     );

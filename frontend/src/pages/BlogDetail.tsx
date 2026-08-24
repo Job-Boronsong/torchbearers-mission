@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left.mjs';
-import { getBlog } from '../api';
+import { getBlog, getCachedPublicContent } from '../api';
 import type { BlogPost } from '../api';
 import { format } from 'date-fns';
 import ContentUnavailable from '../components/ContentUnavailable';
 
 export default function BlogDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
+  const cachedPost = slug ? getCachedPublicContent<BlogPost>(`blog:${slug}`) : undefined;
+  const [post, setPost] = useState<BlogPost | null>(cachedPost ?? null);
+  const [loading, setLoading] = useState(() => !cachedPost);
   const [error, setError] = useState(false);
-  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(cachedPost ? slug ?? null : null);
   const [retryAttempt, setRetryAttempt] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
     let isMounted = true;
 
-    getBlog(slug)
+    getBlog(slug, { forceRefresh: retryAttempt > 0 })
       .then(res => {
         if (isMounted) {
           setPost(res);
@@ -46,7 +47,7 @@ export default function BlogDetail() {
 
   if (loading || loadedSlug !== slug) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-label="Loading article">
         <div className="loading-spinner"></div>
       </div>
     );

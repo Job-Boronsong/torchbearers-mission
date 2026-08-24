@@ -92,41 +92,87 @@ export interface AboutData {
   team: TeamMember[];
 }
 
-// API Methods
-const inFlightPublicRequests = new Map<string, Promise<unknown>>();
+// Public CMS content changes infrequently, so keep successful responses for a short
+// period to make return navigation instant without allowing stale content to linger.
+export const PUBLIC_CONTENT_CACHE_TTL_MS = 30_000;
 
-const shareInFlightPublicRequest = <T>(key: string, request: () => Promise<T>): Promise<T> => {
+interface PublicContentCacheEntry {
+  data: unknown;
+  expiresAt: number;
+}
+
+export interface PublicRequestOptions {
+  forceRefresh?: boolean;
+}
+
+const inFlightPublicRequests = new Map<string, Promise<unknown>>();
+const publicContentCache = new Map<string, PublicContentCacheEntry>();
+
+export const getCachedPublicContent = <T>(key: string): T | undefined => {
+  const cached = publicContentCache.get(key);
+  if (!cached) {
+    return undefined;
+  }
+
+  if (cached.expiresAt <= Date.now()) {
+    publicContentCache.delete(key);
+    return undefined;
+  }
+
+  return cached.data as T;
+};
+
+const shareInFlightPublicRequest = <T>(
+  key: string,
+  request: () => Promise<T>,
+  options: PublicRequestOptions = {},
+): Promise<T> => {
+  if (!options.forceRefresh) {
+    const cached = getCachedPublicContent<T>(key);
+    if (cached !== undefined) {
+      return Promise.resolve(cached);
+    }
+  }
+
   const existingRequest = inFlightPublicRequests.get(key);
   if (existingRequest) {
     return existingRequest as Promise<T>;
   }
 
-  const newRequest = request().finally(() => {
-    if (inFlightPublicRequests.get(key) === newRequest) {
-      inFlightPublicRequests.delete(key);
-    }
-  });
+  const newRequest = request()
+    .then(data => {
+      publicContentCache.set(key, {
+        data,
+        expiresAt: Date.now() + PUBLIC_CONTENT_CACHE_TTL_MS,
+      });
+      return data;
+    })
+    .finally(() => {
+      if (inFlightPublicRequests.get(key) === newRequest) {
+        inFlightPublicRequests.delete(key);
+      }
+    });
   inFlightPublicRequests.set(key, newRequest);
   return newRequest;
 };
 
-export const getHome = () => shareInFlightPublicRequest('home', () =>
-  api.get<HomeData>('/home/').then(res => res.data)
+export const getHome = (options?: PublicRequestOptions) => shareInFlightPublicRequest('home', () =>
+  api.get<HomeData>('/home/').then(res => res.data), options
 );
-export const getProjects = () => shareInFlightPublicRequest('projects', () =>
-  api.get<{ projects: Project[] }>('/projects/').then(res => res.data.projects)
+export const getProjects = (options?: PublicRequestOptions) => shareInFlightPublicRequest('projects', () =>
+  api.get<{ projects: Project[] }>('/projects/').then(res => res.data.projects), options
 );
-export const getProject = (slug: string) => shareInFlightPublicRequest(`project:${slug}`, () =>
-  api.get<Project>(`/projects/${slug}/`).then(res => res.data)
+export const getProject = (slug: string, options?: PublicRequestOptions) => shareInFlightPublicRequest(`project:${slug}`, () =>
+  api.get<Project>(`/projects/${slug}/`).then(res => res.data), options
 );
-export const getBlogs = () => shareInFlightPublicRequest('blogs', () =>
-  api.get<{ posts: BlogPost[] }>('/blog/').then(res => res.data.posts)
+export const getBlogs = (options?: PublicRequestOptions) => shareInFlightPublicRequest('blogs', () =>
+  api.get<{ posts: BlogPost[] }>('/blog/').then(res => res.data.posts), options
 );
-export const getBlog = (slug: string) => shareInFlightPublicRequest(`blog:${slug}`, () =>
-  api.get<BlogPost>(`/blog/${slug}/`).then(res => res.data)
+export const getBlog = (slug: string, options?: PublicRequestOptions) => shareInFlightPublicRequest(`blog:${slug}`, () =>
+  api.get<BlogPost>(`/blog/${slug}/`).then(res => res.data), options
 );
-export const getAbout = () => shareInFlightPublicRequest('about', () =>
-  api.get<AboutData>('/about/').then(res => res.data)
+export const getAbout = (options?: PublicRequestOptions) => shareInFlightPublicRequest('about', () =>
+  api.get<AboutData>('/about/').then(res => res.data), options
 );
 
 let footerRequest: Promise<FooterContent> | null = null;

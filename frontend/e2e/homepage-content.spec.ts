@@ -77,6 +77,84 @@ test('homepage content loads from the Django API', async ({ page }) => {
   expect(failedApiResponses, 'homepage API responses returned errors').toEqual([]);
 });
 
+const cachedHomepageBody = {
+  slides: [{
+    id: 1,
+    title: 'Cached Home',
+    subtitle: 'Loaded without waiting.',
+    image: null,
+    button_text: '',
+    button_link: '',
+    layout: 'center',
+  }],
+  featured_projects: [],
+  featured_blogs: [],
+  total_donations: '0',
+  donor_count: 0,
+};
+
+test('homepage reuses fresh cached content after returning to the page', async ({ page }) => {
+  let homepageRequests = 0;
+
+  await page.route('**/api/home/', async (route) => {
+    homepageRequests += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(cachedHomepageBody),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Cached Home' })).toBeVisible();
+
+  await page.getByRole('banner').getByRole('link', { name: 'Contact', exact: true }).click();
+  await expect(page).toHaveURL('/contact');
+  await page.getByRole('banner').getByRole('link', { name: 'Home', exact: true }).click();
+
+  await expect(page.getByRole('status', { name: 'Loading homepage' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1, name: 'Cached Home' })).toBeVisible();
+  expect(homepageRequests, 'fresh homepage content should be reused on return').toBe(1);
+});
+
+test('homepage refreshes cached content after its freshness window expires', async ({ page }) => {
+  let homepageRequests = 0;
+
+  await page.clock.install();
+  await page.route('**/api/home/', async (route) => {
+    homepageRequests += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ...cachedHomepageBody,
+        slides: [{
+          ...cachedHomepageBody.slides[0],
+          title: homepageRequests === 1 ? 'Cached Home' : 'Refreshed Home',
+        }],
+      }),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Cached Home' })).toBeVisible();
+
+  await page.clock.fastForward(30_001);
+  await page.getByRole('banner').getByRole('link', { name: 'Contact', exact: true }).click();
+  await expect(page).toHaveURL('/contact');
+  const refreshedResponsePromise = page.waitForResponse(
+    (response) =>
+      isHomepageApiResponse(response) &&
+      response.status() === 200 &&
+      new URL(response.url()).pathname === '/api/home/',
+  );
+  await page.getByRole('banner').getByRole('link', { name: 'Home', exact: true }).click();
+  await refreshedResponsePromise;
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Refreshed Home' })).toBeVisible();
+  expect(homepageRequests, 'expired homepage content should be requested again').toBe(2);
+});
+
 test('homepage API errors show a retry state without hiding the footer', async ({ page }) => {
   let homepageRequests = 0;
 
