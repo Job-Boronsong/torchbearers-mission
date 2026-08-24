@@ -142,6 +142,149 @@ test('public navigation prefetches a first visit before navigation', async ({ pa
   await expect(page.getByRole('heading', { level: 1, name: 'About Us' })).toBeVisible();
 });
 
+test('project and blog cards prefetch their matching detail routes before navigation', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: {
+        effectiveType: '4g',
+        saveData: true,
+      },
+    });
+
+    const routeLoadingSelector = '[role="status"][aria-label="Loading page"]';
+    (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = false;
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (
+            node.nodeType === Node.ELEMENT_NODE
+            && ((node as Element).matches(routeLoadingSelector)
+              || (node as Element).querySelector(routeLoadingSelector))
+          ) {
+            (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = true;
+            return;
+          }
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  });
+
+  const detailChunkRequests: string[] = [];
+  page.on('request', request => {
+    const pathname = new URL(request.url()).pathname;
+    if (pathname.endsWith('/src/pages/ProjectDetail.tsx') || pathname.endsWith('/src/pages/BlogDetail.tsx')) {
+      detailChunkRequests.push(pathname);
+    }
+  });
+
+  await page.route('**/api/projects/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        projects: [{
+          id: 101,
+          title: 'Clean Water Initiative',
+          slug: 'clean-water-initiative',
+          feature_image: null,
+          created_at: '2026-08-24T00:00:00Z',
+          show_donate: false,
+        }],
+      }),
+    });
+  });
+  await page.route('**/api/projects/clean-water-initiative/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 101,
+        title: 'Clean Water Initiative',
+        slug: 'clean-water-initiative',
+        description: '<p>Clean water for local communities.</p>',
+        feature_image: null,
+        created_at: '2026-08-24T00:00:00Z',
+        show_donate: false,
+      }),
+    });
+  });
+
+  await page.goto('/projects');
+  await expect(page.getByRole('heading', { level: 1, name: 'Our Projects' })).toBeVisible();
+  const projectLink = page.locator('a[href="/projects/clean-water-initiative"]');
+  const projectChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/ProjectDetail.tsx'),
+  );
+  await projectLink.focus();
+  await projectChunkRequest;
+  expect(detailChunkRequests).toEqual(['/src/pages/ProjectDetail.tsx']);
+
+  await projectLink.click();
+  await expect(page).toHaveURL('/projects/clean-water-initiative');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched project detail route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'Clean Water Initiative' })).toBeVisible();
+
+  await page.route('**/api/blog/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        posts: [{
+          id: 202,
+          title: 'A New Chapter',
+          slug: 'a-new-chapter',
+          feature_image: null,
+          seo_description: 'A story from the field.',
+          content: '<p>Serving together.</p>',
+          created_at: '2026-08-24T00:00:00Z',
+        }],
+      }),
+    });
+  });
+  await page.route('**/api/blog/a-new-chapter/', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 202,
+        title: 'A New Chapter',
+        slug: 'a-new-chapter',
+        feature_image: null,
+        seo_description: 'A story from the field.',
+        content: '<p>Serving together.</p>',
+        created_at: '2026-08-24T00:00:00Z',
+      }),
+    });
+  });
+
+  await page.goto('/blog');
+  await expect(page.getByRole('heading', { level: 1, name: 'Our Blog' })).toBeVisible();
+  const blogLink = page.locator('a[href="/blog/a-new-chapter"]');
+  const blogChunkRequest = page.waitForRequest(
+    request => new URL(request.url()).pathname.endsWith('/src/pages/BlogDetail.tsx'),
+  );
+  await blogLink.focus();
+  await blogChunkRequest;
+  expect(detailChunkRequests).toEqual([
+    '/src/pages/ProjectDetail.tsx',
+    '/src/pages/BlogDetail.tsx',
+  ]);
+
+  await blogLink.click();
+  await expect(page).toHaveURL('/blog/a-new-chapter');
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'a prefetched blog detail route should not show the generic route-code fallback',
+  ).toBe(false);
+  await expect(page.getByRole('heading', { level: 1, name: 'A New Chapter' })).toBeVisible();
+});
+
 const cachedHomepageBody = {
   slides: [{
     id: 1,

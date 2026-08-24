@@ -5,6 +5,11 @@ import Globe from 'lucide-react/dist/esm/icons/globe.mjs';
 import { getCachedPublicContent, getProjects } from '../api';
 import type { Project } from '../api';
 import ContentUnavailable from '../components/ContentUnavailable';
+import { preloadPublicRoute } from '../routeLoaders';
+
+const prefetchProject = (slug: string) => {
+  void preloadPublicRoute(`/projects/${slug}`).catch(() => undefined);
+};
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>(
@@ -84,7 +89,14 @@ export default function Projects() {
           ) : (
             <div className="grid-3">
               {projects.map(project => (
-                <Link to={`/projects/${project.slug}`} key={project.id} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link
+                  to={`/projects/${project.slug}`}
+                  key={project.id}
+                  className="card"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onMouseEnter={() => prefetchProject(project.slug)}
+                  onFocus={() => prefetchProject(project.slug)}
+                >
                   {project.feature_image ? (
                     <img src={project.feature_image} alt={project.title} className="card-img" />
                   ) : (

@@ -19,6 +19,11 @@ const publicRouteLoaders: Record<string, PublicRouteLoader> = {
   '/contact': loadContact,
 };
 
+const publicDetailRouteLoaders: Array<{ prefix: string; loader: PublicRouteLoader }> = [
+  { prefix: '/projects/', loader: loadProjectDetail },
+  { prefix: '/blog/', loader: loadBlogDetail },
+];
+
 export const publicRoutePaths = Object.keys(publicRouteLoaders);
 
 type ConnectionInformation = {
@@ -43,7 +48,9 @@ export const canPrefetchPublicRoutes = () => {
 };
 
 export const preloadPublicRoute = (pathname: string) => (
-  publicRouteLoaders[pathname]?.() ?? Promise.resolve()
+  publicRouteLoaders[pathname]?.()
+    ?? publicDetailRouteLoaders.find(route => pathname.startsWith(route.prefix))?.loader()
+    ?? Promise.resolve()
 );
 
 export const preloadPublicRoutes = async (currentPathname: string) => {

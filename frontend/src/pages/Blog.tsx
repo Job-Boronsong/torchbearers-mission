@@ -5,6 +5,11 @@ import { getBlogs, getCachedPublicContent } from '../api';
 import type { BlogPost } from '../api';
 import { format } from 'date-fns';
 import ContentUnavailable from '../components/ContentUnavailable';
+import { preloadPublicRoute } from '../routeLoaders';
+
+const prefetchBlogPost = (slug: string) => {
+  void preloadPublicRoute(`/blog/${slug}`).catch(() => undefined);
+};
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>(
@@ -83,7 +88,14 @@ export default function Blog() {
           ) : (
             <div className="grid-3">
               {posts.map(post => (
-                <Link to={`/blog/${post.slug}`} key={post.id} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Link
+                  to={`/blog/${post.slug}`}
+                  key={post.id}
+                  className="card"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  onMouseEnter={() => prefetchBlogPost(post.slug)}
+                  onFocus={() => prefetchBlogPost(post.slug)}
+                >
                   {post.feature_image ? (
                     <img src={post.feature_image} alt={post.title} className="card-img" style={{ height: '220px' }} />
                   ) : (
