@@ -1,5 +1,6 @@
 from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 from django.db import models
 import uuid
 from django.conf import settings
@@ -107,6 +108,12 @@ class Volunteer(models.Model):
 # =========================
 # Donations
 # =========================
+validate_flutterwave_transaction_id = RegexValidator(
+    regex=r"\A[0-9]{1,100}\Z",
+    message="Transaction ID must contain only ASCII digits.",
+)
+
+
 class Donation(models.Model):
     PAYMENT_METHODS = (
         ('momo', 'Mobile Money'),
@@ -124,7 +131,13 @@ class Donation(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
     momo_network = models.CharField(max_length=10, choices=MOMO_NETWORKS, blank=True)
-    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    transaction_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[validate_flutterwave_transaction_id],
+    )
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

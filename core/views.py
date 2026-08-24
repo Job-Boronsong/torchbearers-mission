@@ -10,9 +10,10 @@ from django.core.mail import send_mail, send_mass_mail
 import requests
 from django_ratelimit.decorators import ratelimit
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from .models import (
     MissionVision,
     ContactMessage,
@@ -27,6 +28,7 @@ from .models import (
     NewsletterOpen,
     NewsletterClick,
     CarouselSlide,
+    validate_flutterwave_transaction_id,
 )
 
 NEWSLETTER_ALLOWED_REDIRECT_HOSTS = frozenset({
@@ -238,6 +240,14 @@ def verify_donation(request):
     if not transaction_id:
         return redirect("/")
 
+    # Flutterwave returns numeric transaction IDs. Reject anything else before
+    # constructing a URL or preparing the secret-bearing request.
+    try:
+        validate_flutterwave_transaction_id(transaction_id)
+    except ValidationError:
+        logger.warning("Rejected invalid Flutterwave transaction ID.")
+        return redirect("/")
+
     # 🚫 Prevent re-verification spam
     if Donation.objects.filter(transaction_id=transaction_id, is_verified=True).exists():
         return redirect("/")
@@ -248,10 +258,15 @@ def verify_donation(request):
     }
 
     try:
+        verification_url = (
+            "https://api.flutterwave.com/v3/transactions/"
+            f"{quote(transaction_id, safe='')}/verify"
+        )
         response = requests.get(
-            f"https://api.flutterwave.com/v3/transactions/{transaction_id}/verify",
+            verification_url,
             headers=headers,
             timeout=15,
+            allow_redirects=False,
         )
         data = response.json()
     except Exception as e:
