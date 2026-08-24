@@ -17,19 +17,36 @@ export default function Home() {
   const { openVolunteer } = useVolunteer();
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     getHome()
       .then(res => {
-        setData(res);
-        setLoading(false);
+        if (isMounted) {
+          setData(res);
+          setCurrentSlide(0);
+        }
       })
       .catch(err => {
         console.error(err);
-        setLoading(false);
+        if (isMounted) {
+          setHasError(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
       });
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [retryAttempt]);
 
   useEffect(() => {
     if (!data?.slides?.length) return;
@@ -42,9 +59,55 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="loading-container">
+      <div className="loading-container" role="status" aria-label="Loading homepage">
         <div className="loading-spinner"></div>
       </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <section
+        aria-labelledby="homepage-error-title"
+        style={{
+          minHeight: '50vh',
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: 'var(--bg-subtle)',
+          textAlign: 'center',
+        }}
+      >
+        <div className="container">
+          <div
+            role="alert"
+            style={{
+              maxWidth: '600px',
+              margin: '0 auto',
+              padding: '3rem 1.5rem',
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            <h1 id="homepage-error-title" className="h2">We couldn’t load the homepage</h1>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+              Something went wrong while loading our content. Please try again.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setLoading(true);
+                setHasError(false);
+                setRetryAttempt(attempt => attempt + 1);
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      </section>
     );
   }
 

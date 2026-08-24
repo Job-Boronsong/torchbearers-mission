@@ -2,3 +2,4 @@
 - [Python audit bootstrap](python-audit-bootstrap.md) — pinned-file audits may need pip resolution disabled when the package firewall blocks pip bootstrap.
 - [Django admin test authentication](django-admin-test-auth.md) — admin UI tests must account for Axes and forced first-login password changes.
 - [Playwright browser runtime](playwright-browser-runtime.md) — Chromium E2E checks need Nix runtime libraries as well as the Playwright package.
+- [Strict Mode API retry tests](strict-mode-api-retry-tests.md) — dev-mode effect replay can issue duplicate initial API calls; failure tests must account for all initial requests.

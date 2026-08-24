@@ -68,3 +68,45 @@ test('homepage content loads from the Django API', async ({ page }) => {
   expect(failedApiRequests, 'homepage API requests failed').toEqual([]);
   expect(failedApiResponses, 'homepage API responses returned errors').toEqual([]);
 });
+
+test('homepage API errors show a retry state without hiding the footer', async ({ page }) => {
+  let failedInitialRequests = 0;
+
+  await page.route('**/api/home/', async (route) => {
+    if (failedInitialRequests < 2) {
+      failedInitialRequests += 1;
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Service unavailable' }),
+      });
+      return;
+    }
+
+    await route.continue();
+  });
+
+  await page.goto('/');
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'We couldn’t load the homepage' }),
+  ).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('Please try again.');
+  const footer = page.getByRole('contentinfo');
+  await expect(footer).toBeVisible();
+  await expect(footer.getByRole('link', { name: 'About', exact: true })).toBeVisible();
+
+  const retryResponsePromise = page.waitForResponse(
+    (response) =>
+      isHomepageApiResponse(response) &&
+      new URL(response.url()).pathname === '/api/home/' &&
+      response.status() === 200,
+  );
+  await page.getByRole('button', { name: 'Try again' }).click();
+  await retryResponsePromise;
+
+  await expect(page.getByRole('heading', { name: 'Join the Mission' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'We couldn’t load the homepage' }),
+  ).toHaveCount(0);
+});
