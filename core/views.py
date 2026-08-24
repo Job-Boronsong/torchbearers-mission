@@ -12,6 +12,7 @@ from django_ratelimit.decorators import ratelimit
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
+from urllib.parse import urlparse
 from .models import (
     MissionVision,
     ContactMessage,
@@ -21,11 +22,61 @@ from .models import (
     Volunteer,
     WhoWeAre,
     TeamMember,
+    Newsletter,
     NewsletterSubscriber,
     NewsletterOpen,
     NewsletterClick,
     CarouselSlide,
 )
+
+NEWSLETTER_ALLOWED_REDIRECT_HOSTS = frozenset({
+    "torchbearersmission.org",
+    "www.torchbearersmission.org",
+    "torchbearersmissions.org",
+    "www.torchbearersmissions.org",
+})
+
+
+def _safe_newsletter_target(target):
+    """Return an administrator-approved newsletter destination, if any."""
+    if not target:
+        return None
+
+    original_target = target
+    target = target.strip()
+    if not target or target != original_target or any(
+        character in target for character in ("\r", "\n", "\\")
+    ):
+        return None
+
+    try:
+        parsed = urlparse(target)
+        hostname = parsed.hostname
+        port = parsed.port
+    except ValueError:
+        return None
+
+    # Relative paths stay on this site. Reject protocol-relative URLs because
+    # browsers treat //attacker.example as an external destination.
+    if not parsed.scheme and not parsed.netloc:
+        if target.startswith("/") and not target.startswith("//"):
+            return target
+        return None
+
+    if (
+        parsed.scheme not in {"http", "https"}
+        or hostname not in NEWSLETTER_ALLOWED_REDIRECT_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
+        return None
+
+    # Do not allow an approved hostname with an attacker-controlled service
+    # port. Standard HTTP(S) ports are the only administrator-approved ports.
+    if port is not None and port not in {80, 443}:
+        return None
+
+    return target
 
 
 # ================= HOME =================
@@ -388,14 +439,14 @@ def newsletter_subscribe(request):
 
     if not email:
         messages.error(request, "Please enter a valid email address.")
-        return redirect(request.META.get("HTTP_REFERER", "/"))
+        return redirect("/")
 
     if NewsletterSubscriber.objects.filter(email=email).exists():
         messages.info(
             request,
             "This email is already subscribed to our newsletter."
         )
-        return redirect(request.META.get("HTTP_REFERER", "/"))
+        return redirect("/")
 
     subscriber = NewsletterSubscriber.objects.create(email=email)
 
@@ -417,7 +468,7 @@ def newsletter_subscribe(request):
         "Subscription successful! Thank you for subscribing."
     )
 
-    return redirect(request.META.get("HTTP_REFERER", "/"))
+    return redirect("/")
 
 
 from django.views.decorators.http import require_GET
@@ -438,28 +489,6 @@ def newsletter_unsubscribe(request, token):
         "newsletter/unsubscribed.html",
         {"email": subscriber.email}
     )
-
-@require_GET
-def newsletter_click_redirect(request, newsletter_id, subscriber_id):
-    subscriber = get_object_or_404(
-        NewsletterSubscriber,
-        id=subscriber_id,
-        is_active=True
-    )
-
-    newsletter = get_object_or_404(Newsletter, id=newsletter_id)
-
-    target = request.GET.get("next")
-    if not target:
-        return redirect("/")
-
-    NewsletterClick.objects.create(
-        newsletter=newsletter,
-        subscriber=subscriber,
-        url=target
-    )
-
-    return redirect(target)
 
 @require_GET
 def newsletter_open_pixel(request, newsletter_id, subscriber_id):
@@ -491,19 +520,11 @@ def newsletter_open_pixel(request, newsletter_id, subscriber_id):
     response["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
 
-from urllib.parse import urlparse
-from django.views.decorators.http import require_GET
-
 @require_GET
 def newsletter_click_redirect(request, newsletter_id, subscriber_id):
-    target = request.GET.get("url") or request.GET.get("next")
+    requested_target = request.GET.get("url") or request.GET.get("next")
+    target = _safe_newsletter_target(requested_target)
     if not target:
-        return redirect("/")
-
-    parsed = urlparse(target)
-
-    # 🔐 Prevent open redirects
-    if parsed.scheme not in ("http", "https"):
         return redirect("/")
 
     newsletter = get_object_or_404(Newsletter, id=newsletter_id)
