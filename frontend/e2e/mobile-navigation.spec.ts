@@ -25,7 +25,6 @@ const isExpectedThirdPartyIframeAbort = (request: Request) => {
   const url = new URL(request.url());
 
   return (
-    request.resourceType() === 'document' &&
     url.origin !== 'http://127.0.0.1:4173' &&
     failure?.errorText === 'net::ERR_ABORTED'
   );

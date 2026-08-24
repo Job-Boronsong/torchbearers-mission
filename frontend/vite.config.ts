@@ -12,6 +12,7 @@ if (!Number.isFinite(initialEntryBudgetKib) || initialEntryBudgetKib <= 0) {
 }
 
 const initialEntryBudgetBytes = initialEntryBudgetKib * 1024
+const djangoProxyTarget = process.env.DJANGO_PROXY_TARGET ?? 'http://localhost:8000'
 
 const reportInitialEntrySize = (): Plugin => ({
   name: 'report-initial-entry-size',
@@ -74,29 +75,29 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: djangoProxyTarget,
         changeOrigin: true,
       },
       '/media': {
-        target: 'http://localhost:8000',
+        target: djangoProxyTarget,
         changeOrigin: true,
       },
       '/admin': {
-        target: 'http://localhost:8000',
+        target: djangoProxyTarget,
         changeOrigin: true,
       },
       '/accounts': {
-        target: 'http://localhost:8000',
+        target: djangoProxyTarget,
         changeOrigin: true,
       },
       // Flutterwave redirects donors to this legacy Django callback URL.
       // Keep the public /donate page handled by the React app.
       '/donation/verify': {
-        target: 'http://localhost:8000',
+        target: djangoProxyTarget,
         changeOrigin: true,
       },
       '/static': {
-        target: 'http://localhost:8000',
+        target: djangoProxyTarget,
         changeOrigin: true,
       },
     },
