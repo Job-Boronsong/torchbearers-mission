@@ -24,6 +24,12 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      // Flutterwave redirects donors to this legacy Django callback URL.
+      // Keep the public /donate page handled by the React app.
+      '/donation/verify': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/static': {
         target: 'http://localhost:8000',
         changeOrigin: true,

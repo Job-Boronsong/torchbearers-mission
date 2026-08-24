@@ -222,6 +222,14 @@ class NewsletterRedirectSecurityTests(TestCase):
 class DonationVerificationSecurityTests(TestCase):
     verify_url = reverse("core:verify_donation")
 
+    def test_frontend_callback_path_reaches_django_and_rejects_invalid_request(self):
+        response = self.client.get(
+            "/donation/verify/",
+            {"transaction_id": "not-a-numeric-transaction"},
+        )
+
+        self.assertRedirects(response, "/")
+
     def test_verify_donation_rejects_invalid_transaction_ids(self):
         invalid_transaction_ids = (
             "abc123",
