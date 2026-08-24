@@ -3,4 +3,4 @@
 - [Django admin test authentication](django-admin-test-auth.md) — admin UI tests must account for Axes and forced first-login password changes.
 - [Playwright browser runtime](playwright-browser-runtime.md) — Chromium E2E checks need Nix runtime libraries as well as the Playwright package.
 - [Strict Mode API retry tests](strict-mode-api-retry-tests.md) — dev-mode effect replay can issue duplicate initial API calls; failure tests must account for all initial requests.
-- [Public content cache](public-content-cache.md) — short-lived CMS cache speeds client-side returns but deliberately resets on a full page reload.
+- [Public content cache](public-content-cache.md) — short-lived CMS cache keeps the four public listing pages fast across a browser refresh.

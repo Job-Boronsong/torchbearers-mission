@@ -117,6 +117,28 @@ test('homepage reuses fresh cached content after returning to the page', async (
   expect(homepageRequests, 'fresh homepage content should be reused on return').toBe(1);
 });
 
+test('homepage reuses fresh cached content after a browser refresh', async ({ page }) => {
+  let homepageRequests = 0;
+
+  await page.route('**/api/home/', async (route) => {
+    homepageRequests += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(cachedHomepageBody),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Cached Home' })).toBeVisible();
+
+  await page.reload();
+
+  await expect(page.getByRole('status', { name: 'Loading homepage' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1, name: 'Cached Home' })).toBeVisible();
+  expect(homepageRequests, 'fresh homepage content should be reused after refresh').toBe(1);
+});
+
 test('homepage refreshes cached content after its freshness window expires', async ({ page }) => {
   let homepageRequests = 0;
 
@@ -182,6 +204,10 @@ test('homepage API errors show a retry state without hiding the footer', async (
   await expect(footer).toBeVisible();
   await expect(footer.getByRole('link', { name: 'About', exact: true })).toBeVisible();
   expect(homepageRequests, 'homepage content should be requested once initially').toBe(1);
+  expect(
+    await page.evaluate(() => window.localStorage.getItem('public-content-cache')),
+    'failed homepage responses should not be persisted',
+  ).toBeNull();
 
   const retryResponsePromise = page.waitForResponse(
     (response) =>

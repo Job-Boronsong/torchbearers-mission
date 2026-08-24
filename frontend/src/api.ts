@@ -95,10 +95,16 @@ export interface AboutData {
 // Public CMS content changes infrequently, so keep successful responses for a short
 // period to make return navigation instant without allowing stale content to linger.
 export const PUBLIC_CONTENT_CACHE_TTL_MS = 30_000;
+export const PUBLIC_CONTENT_CACHE_STORAGE_KEY = 'public-content-cache';
 
 interface PublicContentCacheEntry {
   data: unknown;
   expiresAt: number;
+}
+
+interface StoredPublicContentCache {
+  version: 1;
+  entries: Record<string, PublicContentCacheEntry>;
 }
 
 export interface PublicRequestOptions {
@@ -107,8 +113,89 @@ export interface PublicRequestOptions {
 
 const inFlightPublicRequests = new Map<string, Promise<unknown>>();
 const publicContentCache = new Map<string, PublicContentCacheEntry>();
+const persistedPublicContentKeys = new Set(['home', 'about', 'projects', 'blogs']);
+let hasHydratedBrowserCache = false;
+
+const persistPublicContentCache = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const entries: Record<string, PublicContentCacheEntry> = {};
+  const now = Date.now();
+
+  persistedPublicContentKeys.forEach(key => {
+    const cached = publicContentCache.get(key);
+    if (cached && cached.expiresAt > now) {
+      entries[key] = cached;
+    }
+  });
+
+  try {
+    const storedCache: StoredPublicContentCache = {
+      version: 1,
+      entries,
+    };
+    window.localStorage.setItem(PUBLIC_CONTENT_CACHE_STORAGE_KEY, JSON.stringify(storedCache));
+  } catch {
+    // Browser storage can be unavailable or full. Memory caching still works.
+  }
+};
+
+const hydrateBrowserCache = () => {
+  if (hasHydratedBrowserCache || typeof window === 'undefined') {
+    return;
+  }
+
+  hasHydratedBrowserCache = true;
+
+  try {
+    const rawCache = window.localStorage.getItem(PUBLIC_CONTENT_CACHE_STORAGE_KEY);
+    if (!rawCache) {
+      return;
+    }
+
+    const storedCache = JSON.parse(rawCache) as Partial<StoredPublicContentCache>;
+    if (storedCache.version !== 1 || !storedCache.entries || typeof storedCache.entries !== 'object') {
+      window.localStorage.removeItem(PUBLIC_CONTENT_CACHE_STORAGE_KEY);
+      return;
+    }
+
+    const now = Date.now();
+    let foundInvalidEntry = false;
+    Object.entries(storedCache.entries).forEach(([key, cached]) => {
+      if (
+        !persistedPublicContentKeys.has(key)
+        || !cached
+        || typeof cached !== 'object'
+        || typeof cached.expiresAt !== 'number'
+        || !Number.isFinite(cached.expiresAt)
+        || cached.expiresAt <= now
+        || !Object.prototype.hasOwnProperty.call(cached, 'data')
+      ) {
+        foundInvalidEntry = true;
+        return;
+      }
+
+      publicContentCache.set(key, cached);
+    });
+
+    if (foundInvalidEntry) {
+      persistPublicContentCache();
+    }
+  } catch {
+    // Ignore malformed or inaccessible browser storage and use the API normally.
+    try {
+      window.localStorage.removeItem(PUBLIC_CONTENT_CACHE_STORAGE_KEY);
+    } catch {
+      // Storage can remain inaccessible after a read failure.
+    }
+  }
+};
 
 export const getCachedPublicContent = <T>(key: string): T | undefined => {
+  hydrateBrowserCache();
+
   const cached = publicContentCache.get(key);
   if (!cached) {
     return undefined;
@@ -116,6 +203,9 @@ export const getCachedPublicContent = <T>(key: string): T | undefined => {
 
   if (cached.expiresAt <= Date.now()) {
     publicContentCache.delete(key);
+    if (persistedPublicContentKeys.has(key)) {
+      persistPublicContentCache();
+    }
     return undefined;
   }
 
@@ -145,6 +235,9 @@ const shareInFlightPublicRequest = <T>(
         data,
         expiresAt: Date.now() + PUBLIC_CONTENT_CACHE_TTL_MS,
       });
+      if (persistedPublicContentKeys.has(key)) {
+        persistPublicContentCache();
+      }
       return data;
     })
     .finally(() => {

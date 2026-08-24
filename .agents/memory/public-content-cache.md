@@ -3,14 +3,14 @@ name: Public content cache
 description: Scope and freshness behavior for recently loaded public CMS content.
 ---
 
-Public CMS responses use a short-lived in-memory cache, so cache reuse applies to
-client-side navigation in the current browser session, not a full page reload.
+Public CMS responses use a short-lived in-memory cache plus a bounded browser-storage
+cache for the Home, About, Projects, and Blog listing pages. Both use the same 30-second
+freshness window, so recently viewed public pages can also render quickly after refresh.
 
-**Why:** A full reload starts a new JavaScript runtime and necessarily clears
-memory. Keeping the cache process-local preserves a clear, short CMS refresh
-policy without persisting stale responses across sessions.
+**Why:** A full reload starts a new JavaScript runtime and clears memory, while a small
+browser-storage layer preserves the fast return experience without allowing CMS updates
+to remain stale for long.
 
-**How to apply:** Test cache reuse by navigating through React Router links. If
-future work needs reuse after a browser refresh, add an explicitly bounded
-browser-storage cache with its own invalidation policy rather than assuming the
-in-memory cache survives reloads.
+**How to apply:** Keep persistence restricted to the four public listing keys, write only
+successful responses, and remove entries as soon as their shared TTL expires or storage
+data is malformed.
