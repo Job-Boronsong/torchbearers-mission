@@ -83,7 +83,10 @@ const Navbar = () => {
         <button 
           className="mobile-toggle" 
           style={{ display: 'none', background: 'none', border: 'none', color: 'var(--text-main)' }}
-           onClick={() => setIsOpen(open => !open)}
+          aria-controls="mobile-navigation"
+          aria-expanded={isOpen}
+          aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          onClick={() => setIsOpen(open => !open)}
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -91,7 +94,11 @@ const Navbar = () => {
 
       {/* Mobile Nav */}
       {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)', padding: '1rem', boxShadow: 'var(--shadow-md)' }}>
+        <nav
+          id="mobile-navigation"
+          aria-label="Mobile navigation"
+          style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)', padding: '1rem', boxShadow: 'var(--shadow-md)' }}
+        >
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {navLinks.map((link) => (
               <li key={link.path}>
@@ -120,7 +127,7 @@ const Navbar = () => {
               </button>
             </li>
           </ul>
-        </div>
+        </nav>
       )}
       
       <style>{`
