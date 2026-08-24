@@ -4,19 +4,20 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Mail, Phone, MapPin, Heart, Users } from 'lucide-react';
 import { getFooter, subscribeNewsletter } from '../api';
 import type { FooterContent } from '../api';
-import { useDonate } from '../context/DonateModalContext';
-import { useVolunteer } from '../context/VolunteerModalContext';
+import { useDonate } from '../context/useDonate';
+import { useVolunteer } from '../context/useVolunteer';
 
-const Navbar = (_: { footerData: FooterContent | null }) => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { openDonate } = useDonate();
   const { openVolunteer } = useVolunteer();
 
-  // Close mobile menu on route change
   useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
+    const closeMenu = () => setIsOpen(false);
+    window.addEventListener('popstate', closeMenu);
+    return () => window.removeEventListener('popstate', closeMenu);
+  }, []);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -76,7 +77,7 @@ const Navbar = (_: { footerData: FooterContent | null }) => {
         <button 
           className="mobile-toggle" 
           style={{ display: 'none', background: 'none', border: 'none', color: 'var(--text-main)' }}
-          onClick={() => setIsOpen(!isOpen)}
+           onClick={() => setIsOpen(open => !open)}
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -88,8 +89,9 @@ const Navbar = (_: { footerData: FooterContent | null }) => {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {navLinks.map((link) => (
               <li key={link.path}>
-                <Link 
+                <Link
                   to={link.path} 
+                  onClick={() => setIsOpen(false)}
                   style={{ 
                     display: 'block',
                     padding: '0.5rem',
@@ -102,12 +104,12 @@ const Navbar = (_: { footerData: FooterContent | null }) => {
               </li>
             ))}
             <li>
-              <button onClick={openVolunteer} className="btn btn-outline" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
+              <button onClick={() => { setIsOpen(false); openVolunteer(); }} className="btn btn-outline" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
                 <Users size={18} /> Volunteer With Us
               </button>
             </li>
             <li>
-              <button onClick={openDonate} className="btn btn-primary" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
+              <button onClick={() => { setIsOpen(false); openDonate(); }} className="btn btn-primary" style={{ display: 'flex', width: '100%', gap: '0.5rem', cursor: 'pointer' }}>
                 <Heart size={18} /> Donate
               </button>
             </li>
@@ -310,7 +312,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar footerData={footerData} />
+      <Navbar />
       <main style={{ flexGrow: 1 }}>
         {children}
       </main>

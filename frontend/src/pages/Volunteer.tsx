@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Users, Send } from 'lucide-react';
+import { isAxiosError } from 'axios';
 import { submitVolunteer } from '../api';
 
 export default function Volunteer() {
@@ -23,8 +24,11 @@ export default function Volunteer() {
         setStatus({ type: 'success', msg: res.message || 'Thank you for signing up to volunteer!' });
         setFormData({ full_name: '', email: '', phone: '', message: '' });
       }
-    } catch (err: any) {
-      setStatus({ type: 'error', msg: err.response?.data?.error || 'Failed to submit. Please try again.' });
+    } catch (err: unknown) {
+      const message = isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error
+        : undefined;
+      setStatus({ type: 'error', msg: message || 'Failed to submit. Please try again.' });
     } finally {
       setLoading(false);
     }

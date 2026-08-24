@@ -1,26 +1,17 @@
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Send, X } from 'lucide-react';
 import { submitVolunteer } from '../api';
-
-interface VolunteerModalContextType {
-  openVolunteer: () => void;
-}
-
-const VolunteerModalContext = createContext<VolunteerModalContextType>({ openVolunteer: () => {} });
+import { volunteerModalContext } from './useVolunteer';
 
 export function VolunteerModalProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <VolunteerModalContext.Provider value={{ openVolunteer: () => setOpen(true) }}>
+    <volunteerModalContext.Provider value={{ openVolunteer: () => setOpen(true) }}>
       {children}
       {open && <VolunteerModal onClose={() => setOpen(false)} />}
-    </VolunteerModalContext.Provider>
+    </volunteerModalContext.Provider>
   );
-}
-
-export function useVolunteer() {
-  return useContext(VolunteerModalContext);
 }
 
 function VolunteerModal({ onClose }: { onClose: () => void }) {
@@ -44,8 +35,9 @@ function VolunteerModal({ onClose }: { onClose: () => void }) {
         setStatus({ type: 'success', msg: res.message || 'Thank you for signing up to volunteer!' });
         setFormData({ full_name: '', email: '', phone: '', message: '' });
       }
-    } catch (err: any) {
-      setStatus({ type: 'error', msg: err.response?.data?.error || 'Failed to submit. Please try again.' });
+    } catch (err: unknown) {
+      const message = getVolunteerErrorMessage(err);
+      setStatus({ type: 'error', msg: message });
     } finally {
       setLoading(false);
     }
@@ -114,4 +106,23 @@ function VolunteerModal({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+}
+
+function getVolunteerErrorMessage(err: unknown): string {
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'response' in err &&
+    typeof err.response === 'object' &&
+    err.response !== null &&
+    'data' in err.response &&
+    typeof err.response.data === 'object' &&
+    err.response.data !== null &&
+    'error' in err.response.data &&
+    typeof err.response.data.error === 'string'
+  ) {
+    return err.response.data.error;
+  }
+
+  return 'Failed to submit. Please try again.';
 }

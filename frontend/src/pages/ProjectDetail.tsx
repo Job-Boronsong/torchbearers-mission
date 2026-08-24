@@ -4,7 +4,7 @@ import { Heart, ArrowLeft } from 'lucide-react';
 import { getProject } from '../api';
 import type { Project } from '../api';
 import { format } from 'date-fns';
-import { useDonate } from '../context/DonateModalContext';
+import { useDonate } from '../context/useDonate';
 
 export default function ProjectDetail() {
   const { openDonate } = useDonate();

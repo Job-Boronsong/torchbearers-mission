@@ -4,8 +4,8 @@ import { ArrowRight, Heart, Users, Globe, ChevronLeft, ChevronRight } from 'luci
 import { getHome } from '../api';
 import type { HomeData } from '../api';
 import { format } from 'date-fns';
-import { useDonate } from '../context/DonateModalContext';
-import { useVolunteer } from '../context/VolunteerModalContext';
+import { useDonate } from '../context/useDonate';
+import { useVolunteer } from '../context/useVolunteer';
 
 export default function Home() {
   const { openDonate } = useDonate();

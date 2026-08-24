@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, MapPin, Phone, Send } from 'lucide-react';
+import { isAxiosError } from 'axios';
 import { submitContact } from '../api';
 
 export default function Contact() {
@@ -23,8 +24,11 @@ export default function Contact() {
         setStatus({ type: 'success', msg: res.message || 'Message sent successfully. We will get back to you soon!' });
         setFormData({ name: '', email: '', subject: '', message: '' });
       }
-    } catch (err: any) {
-      setStatus({ type: 'error', msg: err.response?.data?.error || 'Failed to send message. Please try again.' });
+    } catch (err: unknown) {
+      const message = isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error
+        : undefined;
+      setStatus({ type: 'error', msg: message || 'Failed to send message. Please try again.' });
     } finally {
       setLoading(false);
     }

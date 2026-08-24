@@ -1,25 +1,16 @@
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
-
-interface DonateModalContextType {
-  openDonate: () => void;
-}
-
-const DonateModalContext = createContext<DonateModalContextType>({ openDonate: () => {} });
+import { donateModalContext } from './useDonate';
 
 export function DonateModalProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <DonateModalContext.Provider value={{ openDonate: () => setOpen(true) }}>
+    <donateModalContext.Provider value={{ openDonate: () => setOpen(true) }}>
       {children}
       {open && <DonateModal onClose={() => setOpen(false)} />}
-    </DonateModalContext.Provider>
+    </donateModalContext.Provider>
   );
-}
-
-export function useDonate() {
-  return useContext(DonateModalContext);
 }
 
 function DonateModal({ onClose }: { onClose: () => void }) {
