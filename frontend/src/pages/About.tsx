@@ -20,8 +20,8 @@ export default function About() {
         }
       })
       .catch(err => {
-        console.error(err);
         if (isMounted) {
+          console.error(err);
           setHasError(true);
         }
       })

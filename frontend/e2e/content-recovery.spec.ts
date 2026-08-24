@@ -104,11 +104,11 @@ const isPageApiRequest = (request: Request, apiPath: string) => {
 
 for (const recoveryPage of recoveryPages) {
   test(`${recoveryPage.path} retries unavailable content without hiding site navigation`, async ({ page }) => {
-    let failedInitialRequests = 0;
+    let pageRequests = 0;
 
     await page.route(`**${recoveryPage.apiPath}`, async (route) => {
-      if (failedInitialRequests < 2) {
-        failedInitialRequests += 1;
+      pageRequests += 1;
+      if (pageRequests === 1) {
         await route.fulfill({
           status: 503,
           contentType: 'application/json',
@@ -132,6 +132,7 @@ for (const recoveryPage of recoveryPages) {
     await expect(page.getByRole('alert')).toContainText('Please try again.');
     await expect(page.getByRole('banner')).toBeVisible();
     await expect(page.getByRole('contentinfo')).toBeVisible();
+    expect(pageRequests, `${recoveryPage.apiPath} should be requested once initially`).toBe(1);
 
     const retryResponsePromise = page.waitForResponse(
       (response) =>

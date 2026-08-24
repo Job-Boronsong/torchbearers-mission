@@ -23,8 +23,8 @@ export default function Blog() {
         }
       })
       .catch(err => {
-        console.error(err);
         if (isMounted) {
+          console.error(err);
           setHasError(true);
         }
       })

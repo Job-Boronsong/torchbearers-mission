@@ -30,8 +30,8 @@ export default function ProjectDetail() {
         }
       })
       .catch(err => {
-        console.error(err);
         if (isMounted) {
+          console.error(err);
           setError(true);
           setLoadedSlug(slug);
         }

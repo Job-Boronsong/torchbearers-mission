@@ -93,12 +93,41 @@ export interface AboutData {
 }
 
 // API Methods
-export const getHome = () => api.get<HomeData>('/home/').then(res => res.data);
-export const getProjects = () => api.get<{ projects: Project[] }>('/projects/').then(res => res.data.projects);
-export const getProject = (slug: string) => api.get<Project>(`/projects/${slug}/`).then(res => res.data);
-export const getBlogs = () => api.get<{ posts: BlogPost[] }>('/blog/').then(res => res.data.posts);
-export const getBlog = (slug: string) => api.get<BlogPost>(`/blog/${slug}/`).then(res => res.data);
-export const getAbout = () => api.get<AboutData>('/about/').then(res => res.data);
+const inFlightPublicRequests = new Map<string, Promise<unknown>>();
+
+const shareInFlightPublicRequest = <T>(key: string, request: () => Promise<T>): Promise<T> => {
+  const existingRequest = inFlightPublicRequests.get(key);
+  if (existingRequest) {
+    return existingRequest as Promise<T>;
+  }
+
+  const newRequest = request().finally(() => {
+    if (inFlightPublicRequests.get(key) === newRequest) {
+      inFlightPublicRequests.delete(key);
+    }
+  });
+  inFlightPublicRequests.set(key, newRequest);
+  return newRequest;
+};
+
+export const getHome = () => shareInFlightPublicRequest('home', () =>
+  api.get<HomeData>('/home/').then(res => res.data)
+);
+export const getProjects = () => shareInFlightPublicRequest('projects', () =>
+  api.get<{ projects: Project[] }>('/projects/').then(res => res.data.projects)
+);
+export const getProject = (slug: string) => shareInFlightPublicRequest(`project:${slug}`, () =>
+  api.get<Project>(`/projects/${slug}/`).then(res => res.data)
+);
+export const getBlogs = () => shareInFlightPublicRequest('blogs', () =>
+  api.get<{ posts: BlogPost[] }>('/blog/').then(res => res.data.posts)
+);
+export const getBlog = (slug: string) => shareInFlightPublicRequest(`blog:${slug}`, () =>
+  api.get<BlogPost>(`/blog/${slug}/`).then(res => res.data)
+);
+export const getAbout = () => shareInFlightPublicRequest('about', () =>
+  api.get<AboutData>('/about/').then(res => res.data)
+);
 
 let footerRequest: Promise<FooterContent> | null = null;
 

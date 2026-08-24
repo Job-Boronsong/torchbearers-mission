@@ -11,8 +11,15 @@ const isHomepageApiRequest = (request: Request) => {
 const isHomepageApiResponse = (response: Response) => isHomepageApiRequest(response.request());
 
 test('homepage content loads from the Django API', async ({ page }) => {
+  let homepageRequests = 0;
   const failedApiRequests: string[] = [];
   const failedApiResponses: string[] = [];
+
+  page.on('request', (request) => {
+    if (isHomepageApiRequest(request)) {
+      homepageRequests += 1;
+    }
+  });
 
   page.on('requestfailed', (request) => {
     if (isHomepageApiRequest(request)) {
@@ -35,6 +42,7 @@ test('homepage content loads from the Django API', async ({ page }) => {
 
   const homeResponse = await homeResponsePromise;
   expect(homeResponse.status(), 'homepage content API request failed').toBe(200);
+  expect(homepageRequests, 'homepage content should be requested once initially').toBe(1);
 
   const homeData = await homeResponse.json();
   expect(homeData).toEqual(
@@ -70,11 +78,11 @@ test('homepage content loads from the Django API', async ({ page }) => {
 });
 
 test('homepage API errors show a retry state without hiding the footer', async ({ page }) => {
-  let failedInitialRequests = 0;
+  let homepageRequests = 0;
 
   await page.route('**/api/home/', async (route) => {
-    if (failedInitialRequests < 2) {
-      failedInitialRequests += 1;
+    homepageRequests += 1;
+    if (homepageRequests === 1) {
       await route.fulfill({
         status: 503,
         contentType: 'application/json',
@@ -95,6 +103,7 @@ test('homepage API errors show a retry state without hiding the footer', async (
   const footer = page.getByRole('contentinfo');
   await expect(footer).toBeVisible();
   await expect(footer.getByRole('link', { name: 'About', exact: true })).toBeVisible();
+  expect(homepageRequests, 'homepage content should be requested once initially').toBe(1);
 
   const retryResponsePromise = page.waitForResponse(
     (response) =>
