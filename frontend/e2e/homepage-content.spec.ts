@@ -120,6 +120,28 @@ test('homepage reuses fresh cached content after returning to the page', async (
 test('homepage reuses fresh cached content after a browser refresh', async ({ page }) => {
   let homepageRequests = 0;
 
+  await page.addInitScript(() => {
+    const routeLoadingSelector = '[role="status"][aria-label="Loading page"]';
+    (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = false;
+
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (
+            node.nodeType === Node.ELEMENT_NODE
+            && ((node as Element).matches(routeLoadingSelector)
+              || (node as Element).querySelector(routeLoadingSelector))
+          ) {
+            (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = true;
+            return;
+          }
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+  });
+
   await page.route('**/api/home/', async (route) => {
     homepageRequests += 1;
     await route.fulfill({
@@ -135,9 +157,98 @@ test('homepage reuses fresh cached content after a browser refresh', async ({ pa
   await page.reload();
 
   await expect(page.getByRole('status', { name: 'Loading homepage' })).toHaveCount(0);
+  expect(
+    await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+    'fresh cached content should be mounted without the route-code loading fallback',
+  ).toBe(false);
   await expect(page.getByRole('heading', { level: 1, name: 'Cached Home' })).toBeVisible();
   expect(homepageRequests, 'fresh homepage content should be reused after refresh').toBe(1);
 });
+
+const cachedPublicPageCases = [
+  {
+    name: 'about page',
+    path: '/about',
+    apiPath: '**/api/about/',
+    heading: 'About Us',
+    body: {
+      mission_vision: {
+        hero_image: null,
+        hero_title: 'About Us',
+        hero_subtitle: 'Our story',
+        vision_and_purpose: '',
+        statement_of_faith: '',
+      },
+      who_we_are: { title: 'Who We Are', content: '' },
+      director_message: null,
+      team: [],
+    },
+  },
+  {
+    name: 'projects page',
+    path: '/projects',
+    apiPath: '**/api/projects/',
+    heading: 'Our Projects',
+    body: { projects: [] },
+  },
+  {
+    name: 'blog page',
+    path: '/blog',
+    apiPath: '**/api/blog/',
+    heading: 'Our Blog',
+    body: { posts: [] },
+  },
+] as const;
+
+for (const pageCase of cachedPublicPageCases) {
+  test(`${pageCase.name} refresh distinguishes route-code and CMS loading`, async ({ page }) => {
+    let contentRequests = 0;
+
+    await page.addInitScript(() => {
+      const routeLoadingSelector = '[role="status"][aria-label="Loading page"]';
+      (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = false;
+
+      const observer = new MutationObserver(records => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (
+              node.nodeType === Node.ELEMENT_NODE
+              && ((node as Element).matches(routeLoadingSelector)
+                || (node as Element).querySelector(routeLoadingSelector))
+            ) {
+              (window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen = true;
+              return;
+            }
+          }
+        }
+      });
+
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    });
+
+    await page.route(pageCase.apiPath, async route => {
+      contentRequests += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(pageCase.body),
+      });
+    });
+
+    await page.goto(pageCase.path);
+    await expect(page.getByRole('heading', { level: 1, name: pageCase.heading })).toBeVisible();
+
+    await page.reload();
+
+    await expect(page.getByRole('status', { name: /Loading (about page|projects|blog)/ })).toHaveCount(0);
+    expect(
+      await page.evaluate(() => Boolean((window as unknown as { routeLoadingSeen?: boolean }).routeLoadingSeen)),
+      'fresh cached content should be mounted without the route-code loading fallback',
+    ).toBe(false);
+    await expect(page.getByRole('heading', { level: 1, name: pageCase.heading })).toBeVisible();
+    expect(contentRequests, 'fresh public content should be reused after refresh').toBe(1);
+  });
+}
 
 test('homepage refreshes cached content after its freshness window expires', async ({ page }) => {
   let homepageRequests = 0;

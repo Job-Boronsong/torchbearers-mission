@@ -2,18 +2,30 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
+import {
+  loadAbout,
+  loadBlog,
+  loadBlogDetail,
+  loadContact,
+  loadDonate,
+  loadHome,
+  loadProjectDetail,
+  loadProjects,
+  loadUnsubscribe,
+  loadVolunteer,
+} from './routeLoaders';
 import './App.css';
 
-const Home = lazy(() => import('./pages/Home'));
-const About = lazy(() => import('./pages/About'));
-const Projects = lazy(() => import('./pages/Projects'));
-const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
-const Blog = lazy(() => import('./pages/Blog'));
-const BlogDetail = lazy(() => import('./pages/BlogDetail'));
-const Contact = lazy(() => import('./pages/Contact'));
-const Donate = lazy(() => import('./pages/Donate'));
-const Volunteer = lazy(() => import('./pages/Volunteer'));
-const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
+const Home = lazy(loadHome);
+const About = lazy(loadAbout);
+const Projects = lazy(loadProjects);
+const ProjectDetail = lazy(loadProjectDetail);
+const Blog = lazy(loadBlog);
+const BlogDetail = lazy(loadBlogDetail);
+const Contact = lazy(loadContact);
+const Donate = lazy(loadDonate);
+const Volunteer = lazy(loadVolunteer);
+const Unsubscribe = lazy(loadUnsubscribe);
 
 const PageLoading = () => (
   <div

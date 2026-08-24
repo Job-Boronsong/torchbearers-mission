@@ -96,6 +96,12 @@ export interface AboutData {
 // period to make return navigation instant without allowing stale content to linger.
 export const PUBLIC_CONTENT_CACHE_TTL_MS = 30_000;
 export const PUBLIC_CONTENT_CACHE_STORAGE_KEY = 'public-content-cache';
+const publicContentCacheKeys: Record<string, string> = {
+  '/': 'home',
+  '/about': 'about',
+  '/projects': 'projects',
+  '/blog': 'blogs',
+};
 
 interface PublicContentCacheEntry {
   data: unknown;
@@ -110,6 +116,8 @@ interface StoredPublicContentCache {
 export interface PublicRequestOptions {
   forceRefresh?: boolean;
 }
+
+export const getPublicContentCacheKey = (pathname: string) => publicContentCacheKeys[pathname];
 
 const inFlightPublicRequests = new Map<string, Promise<unknown>>();
 const publicContentCache = new Map<string, PublicContentCacheEntry>();
