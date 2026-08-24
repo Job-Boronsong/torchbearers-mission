@@ -110,3 +110,51 @@ test('homepage API errors show a retry state without hiding the footer', async (
     page.getByRole('heading', { level: 1, name: 'We couldn’t load the homepage' }),
   ).toHaveCount(0);
 });
+
+test('footer contact details can be retried without hiding footer navigation', async ({ page }) => {
+  let footerRequests = 0;
+
+  await page.route('**/api/footer/', async (route) => {
+    footerRequests += 1;
+
+    if (footerRequests <= 2) {
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Service unavailable' }),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        address: '12 Mission Avenue',
+        email: 'hello@example.org',
+        phone: '+233 20 000 0000',
+        whatsapp: null,
+        facebook: null,
+        twitter: null,
+        linkedin: null,
+        map_embed: null,
+      }),
+    });
+  });
+
+  await page.goto('/');
+
+  const footer = page.getByRole('contentinfo');
+  await expect(
+    footer.getByRole('alert'),
+  ).toContainText('We couldn’t load our contact details. Please try again.');
+  await expect(footer.getByRole('link', { name: 'About', exact: true })).toBeVisible();
+  await expect(footer.getByRole('heading', { name: 'Our Location' })).toBeVisible();
+  await expect(footer.getByTitle('Torchbearers Mission Location')).toBeVisible();
+
+  await footer.getByRole('button', { name: 'Try again' }).click();
+
+  await expect(footer.getByRole('link', { name: 'hello@example.org' })).toBeVisible();
+  await expect(footer.getByText('12 Mission Avenue', { exact: true })).toBeVisible();
+  await expect(footer.getByRole('alert')).toHaveCount(0);
+});

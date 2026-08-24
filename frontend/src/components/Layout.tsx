@@ -154,7 +154,15 @@ const FacebookIcon = () => (
   </svg>
 );
 
-const Footer = ({ footerData }: { footerData: FooterContent | null }) => {
+type FooterStatus = 'loading' | 'ready' | 'error';
+
+interface FooterProps {
+  footerData: FooterContent | null;
+  status: FooterStatus;
+  onRetry: () => void;
+}
+
+const Footer = ({ footerData, status, onRetry }: FooterProps) => {
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'duplicate' | 'err'>('idle');
 
@@ -204,6 +212,39 @@ const Footer = ({ footerData }: { footerData: FooterContent | null }) => {
           {/* 1 — Contact Us */}
           <div style={col}>
             <h4 style={heading}>Contact Us</h4>
+            {status === 'loading' && !footerData && (
+              <p aria-live="polite" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem' }}>
+                Loading contact details…
+              </p>
+            )}
+            {status === 'error' && (
+              <div
+                role="alert"
+                style={{
+                  maxWidth: '260px',
+                  color: 'rgba(255,255,255,0.85)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                <p style={{ marginBottom: '0.75rem' }}>
+                  We couldn’t load our contact details. Please try again.
+                </p>
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  style={{
+                    padding: '0.55rem 0.85rem',
+                    backgroundColor: '#f5a800',
+                    color: '#111',
+                    fontWeight: 700,
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
             {footerData?.address && (
               <div style={row}>
                 <MapPin size={17} style={{ flexShrink: 0, marginTop: 2 }} />
@@ -318,10 +359,35 @@ const Footer = ({ footerData }: { footerData: FooterContent | null }) => {
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const [footerData, setFooterData] = useState<FooterContent | null>(null);
+  const [footerStatus, setFooterStatus] = useState<FooterStatus>('loading');
+  const [footerRetryAttempt, setFooterRetryAttempt] = useState(0);
 
   useEffect(() => {
-    getFooter().then(setFooterData).catch(console.error);
-  }, []);
+    let isMounted = true;
+
+    getFooter()
+      .then(data => {
+        if (isMounted) {
+          setFooterData(data);
+          setFooterStatus('ready');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        if (isMounted) {
+          setFooterStatus('error');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [footerRetryAttempt]);
+
+  const retryFooter = () => {
+    setFooterStatus('loading');
+    setFooterRetryAttempt(attempt => attempt + 1);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -329,7 +395,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <main style={{ flexGrow: 1 }}>
         {children}
       </main>
-      <Footer footerData={footerData} />
+      <Footer footerData={footerData} status={footerStatus} onRetry={retryFooter} />
     </div>
   );
 };
