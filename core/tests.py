@@ -2,8 +2,18 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+from django.contrib.admin.models import LogEntry, ADDITION, DELETION
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
-from .models import Donation, Newsletter, NewsletterClick, NewsletterSubscriber
+from .models import (
+    Donation,
+    Newsletter,
+    NewsletterAllowedDomain,
+    NewsletterClick,
+    NewsletterSubscriber,
+)
 
 
 class NewsletterRedirectSecurityTests(TestCase):
@@ -108,6 +118,103 @@ class NewsletterRedirectSecurityTests(TestCase):
                 newsletter=self.newsletter,
                 subscriber=self.subscriber,
                 url=target,
+            ).exists()
+        )
+
+    def test_newsletter_click_allows_domain_added_to_admin_allowlist(self):
+        NewsletterAllowedDomain.objects.create(domain="trusted-partner.example")
+        target = "https://trusted-partner.example/campaign"
+
+        response = self.client.get(
+            reverse(
+                "core:newsletter_click_redirect",
+                args=[self.newsletter.id, self.subscriber.id],
+            ),
+            {"url": target},
+        )
+
+        self.assertRedirects(response, target, fetch_redirect_response=False)
+
+    def test_newsletter_click_rejects_domain_after_allowlist_removal(self):
+        allowed_domain = NewsletterAllowedDomain.objects.create(
+            domain="trusted-partner.example"
+        )
+        target = "https://trusted-partner.example/campaign"
+        allowed_domain.delete()
+
+        response = self.client.get(
+            reverse(
+                "core:newsletter_click_redirect",
+                args=[self.newsletter.id, self.subscriber.id],
+            ),
+            {"url": target},
+        )
+
+        self.assertRedirects(response, "/")
+        self.assertFalse(NewsletterClick.objects.exists())
+
+    def test_newsletter_allowed_domain_rejects_non_hostname_values(self):
+        for invalid_domain in (
+            "https://trusted-partner.example",
+            "trusted-partner.example/path",
+            "*.trusted-partner.example",
+            "trusted-partner.example:8443",
+        ):
+            with self.subTest(invalid_domain=invalid_domain):
+                with self.assertRaises(ValidationError):
+                    NewsletterAllowedDomain.objects.create(domain=invalid_domain)
+
+    def test_admin_allowlist_changes_are_protected_and_audited(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="newsletter-admin",
+            email="admin@example.com",
+            password="strong-admin-password",
+        )
+        admin_user.userprofile.must_change_password = False
+        admin_user.userprofile.save(update_fields=["must_change_password"])
+        changelist_url = reverse("admin:core_newsletteralloweddomain_changelist")
+        add_url = reverse("admin:core_newsletteralloweddomain_add")
+        response = self.client.get(add_url)
+        self.assertRedirects(
+            response,
+            f"{reverse('admin:login')}?next={add_url}",
+        )
+
+        self.client.force_login(admin_user)
+
+        response = self.client.post(add_url, {"domain": "trusted-partner.example"})
+        self.assertRedirects(response, changelist_url)
+
+        allowed_domain = NewsletterAllowedDomain.objects.get(
+            domain="trusted-partner.example"
+        )
+        content_type = ContentType.objects.get_for_model(NewsletterAllowedDomain)
+        self.assertTrue(
+            LogEntry.objects.filter(
+                user=admin_user,
+                content_type=content_type,
+                object_id=str(allowed_domain.pk),
+                action_flag=ADDITION,
+            ).exists()
+        )
+
+        response = self.client.post(
+            reverse(
+                "admin:core_newsletteralloweddomain_delete",
+                args=[allowed_domain.pk],
+            ),
+            {"post": "yes"},
+        )
+        self.assertRedirects(response, changelist_url)
+        self.assertFalse(
+            NewsletterAllowedDomain.objects.filter(pk=allowed_domain.pk).exists()
+        )
+        self.assertTrue(
+            LogEntry.objects.filter(
+                user=admin_user,
+                content_type=content_type,
+                object_id=str(allowed_domain.pk),
+                action_flag=DELETION,
             ).exists()
         )
 

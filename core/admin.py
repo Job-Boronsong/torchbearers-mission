@@ -27,6 +27,7 @@ from .models import (
     Donation,
     ContactMessage,
     Newsletter,
+    NewsletterAllowedDomain,
     NewsletterSubscriber,
     NewsletterOpen, NewsletterClick,
     FooterContent,
@@ -334,6 +335,14 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     search_fields = ("email",)
     list_filter = ("is_active",)
     actions = [export_newsletter_csv]
+
+
+@admin.register(NewsletterAllowedDomain)
+class NewsletterAllowedDomainAdmin(admin.ModelAdmin):
+    list_display = ("domain", "created_at")
+    search_fields = ("domain",)
+    readonly_fields = ("created_at",)
+    ordering = ("domain",)
 
 
 # =====================================================

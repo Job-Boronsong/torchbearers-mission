@@ -1,5 +1,6 @@
 from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 import uuid
@@ -13,6 +14,7 @@ from .utils.image import optimize_image
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
+import re
 
 
 # =========================
@@ -343,6 +345,71 @@ class Newsletter(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class NewsletterAllowedDomain(models.Model):
+    """An exact hostname that newsletter links may redirect to."""
+
+    domain = models.CharField(
+        max_length=253,
+        unique=True,
+        help_text=(
+            "Hostname only, for example partner.example.org. "
+            "Do not include a scheme, path, port, or wildcard."
+        ),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Newsletter allowed domain"
+        verbose_name_plural = "Newsletter allowed domains"
+        ordering = ("domain",)
+
+    def clean(self):
+        value = (self.domain or "").strip().lower().rstrip(".")
+        if not value:
+            raise ValidationError({"domain": "Enter a domain name."})
+
+        if len(value) > 253 or any(
+            character in value for character in ("/", "?", "#", "@", ":", "\\")
+        ):
+            raise ValidationError({
+                "domain": (
+                    "Enter a hostname only; schemes, paths, ports, credentials, "
+                    "and wildcards are not allowed."
+                )
+            })
+
+        try:
+            ascii_value = value.encode("idna").decode("ascii")
+        except UnicodeError:
+            raise ValidationError({"domain": "Enter a valid domain name."})
+
+        labels = ascii_value.split(".")
+        if (
+            len(labels) < 2
+            or len(ascii_value) > 253
+            or any(
+                not label
+                or len(label) > 63
+                or label.startswith("-")
+                or label.endswith("-")
+                or not re.fullmatch(r"[a-z0-9-]+", label)
+                for label in labels
+            )
+            or not re.fullmatch(r"[a-z0-9-]+", labels[-1])
+            or not any(character.isalpha() for character in labels[-1])
+        ):
+            raise ValidationError({"domain": "Enter a valid public domain name."})
+
+        self.domain = ascii_value
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.domain
 
 
 class NewsletterClick(models.Model):

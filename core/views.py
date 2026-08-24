@@ -24,20 +24,13 @@ from .models import (
     WhoWeAre,
     TeamMember,
     Newsletter,
+    NewsletterAllowedDomain,
     NewsletterSubscriber,
     NewsletterOpen,
     NewsletterClick,
     CarouselSlide,
     validate_flutterwave_transaction_id,
 )
-
-NEWSLETTER_ALLOWED_REDIRECT_HOSTS = frozenset({
-    "torchbearersmission.org",
-    "www.torchbearersmission.org",
-    "torchbearersmissions.org",
-    "www.torchbearersmissions.org",
-})
-
 
 def _safe_newsletter_target(target):
     """Return an administrator-approved newsletter destination, if any."""
@@ -55,6 +48,8 @@ def _safe_newsletter_target(target):
         parsed = urlparse(target)
         hostname = parsed.hostname
         port = parsed.port
+        if hostname:
+            hostname = hostname.encode("idna").decode("ascii").lower()
     except ValueError:
         return None
 
@@ -67,7 +62,9 @@ def _safe_newsletter_target(target):
 
     if (
         parsed.scheme not in {"http", "https"}
-        or hostname not in NEWSLETTER_ALLOWED_REDIRECT_HOSTS
+        or hostname not in NewsletterAllowedDomain.objects.values_list(
+            "domain", flat=True
+        )
         or parsed.username is not None
         or parsed.password is not None
     ):

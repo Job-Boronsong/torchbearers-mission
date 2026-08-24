@@ -1,2 +1,3 @@
 - [Managed Python upgrades](managed-python-upgrades.md) — package-managed Python upgrades can append duplicate pins; normalize the manifest before final verification.
 - [Python audit bootstrap](python-audit-bootstrap.md) — pinned-file audits may need pip resolution disabled when the package firewall blocks pip bootstrap.
+- [Django admin test authentication](django-admin-test-auth.md) — admin UI tests must account for Axes and forced first-login password changes.
