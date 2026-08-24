@@ -5,10 +5,19 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: 'list',
+  outputDir: 'test-results',
+  preserveOutput: 'failures-only',
+  reporter: process.env.CI
+    ? [
+        ['list'],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+      ]
+    : 'list',
   use: {
     baseURL: 'http://127.0.0.1:4173',
+    screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
+    video: 'retain-on-failure',
   },
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4173',

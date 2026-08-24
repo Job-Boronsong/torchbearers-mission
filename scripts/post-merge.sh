@@ -13,3 +13,4 @@ python manage.py migrate --noinput --skip-checks
 python manage.py collectstatic --noinput --skip-checks
 
 npm run build --prefix frontend
+CI=1 npm run test:e2e --prefix frontend

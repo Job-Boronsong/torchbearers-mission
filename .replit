@@ -41,7 +41,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python manage.py test core"
+args = "python manage.py test core && CI=1 npm run test:e2e --prefix frontend"
 
 [workflows.workflow.metadata]
 isValidation = true
