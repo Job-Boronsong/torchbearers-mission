@@ -176,6 +176,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # CKEDITOR 5 (ONLY)
 # --------------------------------------------------
 CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_5_UPLOAD_FILE_TYPES = [
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "bmp",
+    "webp",
+    "tiff",
+]
+CKEDITOR_5_MAX_FILE_SIZE = 20
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
 
 CKEDITOR_5_CONFIGS = {
     "default": {

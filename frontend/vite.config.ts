@@ -90,6 +90,10 @@ export default defineConfig({
         target: djangoProxyTarget,
         changeOrigin: true,
       },
+      '/ckeditor5': {
+        target: djangoProxyTarget,
+        changeOrigin: true,
+      },
       // Flutterwave redirects donors to this legacy Django callback URL.
       // Keep the public /donate page handled by the React app.
       '/donation/verify': {

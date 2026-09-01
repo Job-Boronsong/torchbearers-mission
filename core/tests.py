@@ -1,3 +1,5 @@
+from io import BytesIO
+import tempfile
 from unittest.mock import Mock, patch
 
 from django.test import TestCase, override_settings
@@ -6,6 +8,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.admin.models import LogEntry, ADDITION, DELETION
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
 from .models import (
     Donation,
@@ -13,6 +17,8 @@ from .models import (
     NewsletterAllowedDomain,
     NewsletterClick,
     NewsletterSubscriber,
+    Project,
+    UserProfile,
 )
 
 
@@ -419,3 +425,47 @@ class DonationVerificationSecurityTests(TestCase):
 
         self.assertEqual(get.call_count, len(rejected_responses))
         send_mail.assert_not_called()
+
+
+class CKEditorImageUploadTests(TestCase):
+    def setUp(self):
+        self.staff_user = get_user_model().objects.create_user(
+            username="project-editor",
+            password="test-password",
+            is_staff=True,
+        )
+        UserProfile.objects.filter(user=self.staff_user).update(
+            must_change_password=False
+        )
+        self.client.force_login(self.staff_user)
+
+    def test_project_editor_file_picker_accepts_jpg_images(self):
+        description_field = Project._meta.get_field("description").formfield()
+
+        html = description_field.widget.render(
+            "description",
+            "",
+            attrs={"id": "id_description"},
+        )
+
+        self.assertIn("&quot;jpg&quot;", html)
+        self.assertIn("&quot;jpeg&quot;", html)
+
+    def test_staff_user_can_upload_jpg_into_project_description(self):
+        image_data = BytesIO()
+        Image.new("RGB", (8, 8), color="red").save(image_data, format="JPEG")
+        upload = SimpleUploadedFile(
+            "project-paragraph.jpg",
+            image_data.getvalue(),
+            content_type="image/jpeg",
+        )
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                response = self.client.post(
+                    reverse("ck_editor_5_upload_file"),
+                    {"upload": upload},
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["url"].endswith("project-paragraph.jpg"))

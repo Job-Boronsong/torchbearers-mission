@@ -44,6 +44,11 @@ args = "python manage.py test core && CI=1 npm run test:e2e --prefix frontend"
 isValidation = true
 
 [[ports]]
+localPort = 4173
+externalPort = 3000
+exposeLocalhost = true
+
+[[ports]]
 localPort = 5000
 externalPort = 80
 
